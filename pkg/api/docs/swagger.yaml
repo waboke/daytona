@@ -282,6 +282,8 @@ definitions:
         type: integer
       logFilePath:
         type: string
+      preferNamedVolumes:
+        type: boolean
       providersDir:
         type: string
       registryUrl:

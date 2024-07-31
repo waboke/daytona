@@ -1554,6 +1554,9 @@ const docTemplate = `{
                 "logFilePath": {
                     "type": "string"
                 },
+                "preferNamedVolumes": {
+                    "type": "boolean"
+                },
                 "providersDir": {
                     "type": "string"
                 },

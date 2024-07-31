@@ -54,6 +54,10 @@ func ConfigurationForm(config *apiclient.ServerConfig, containerRegistries []api
 			huh.NewInput().
 				Title("Default Project User").
 				Value(config.DefaultProjectUser),
+			huh.NewConfirm().
+				Title("Prefer Named Volumes").
+				Description("Use named volumes instead of bind mounts for container volumes.\nChanging this will influence the local build registry storage as well.").
+				Value(config.PreferNamedVolumes),
 		),
 		huh.NewGroup(
 			huh.NewInput().

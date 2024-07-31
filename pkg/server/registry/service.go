@@ -10,28 +10,34 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 )
 
+const volumeName = "daytona-registry"
+
 type LocalContainerRegistryConfig struct {
-	DataPath string
-	Port     uint32
-	Image    string
+	DataPath       string
+	Port           uint32
+	Image          string
+	UseNamedVolume bool
 }
 
 func NewLocalContainerRegistry(config *LocalContainerRegistryConfig) *LocalContainerRegistry {
 	return &LocalContainerRegistry{
-		dataPath: config.DataPath,
-		port:     config.Port,
-		image:    config.Image,
+		dataPath:       config.DataPath,
+		port:           config.Port,
+		image:          config.Image,
+		useNamedVolume: config.UseNamedVolume,
 	}
 }
 
 type LocalContainerRegistry struct {
-	dataPath string
-	port     uint32
-	image    string
+	dataPath       string
+	port           uint32
+	image          string
+	useNamedVolume bool
 }
 
 func (s *LocalContainerRegistry) Start() error {
@@ -68,8 +74,7 @@ func (s *LocalContainerRegistry) Start() error {
 		return err
 	}
 
-	//	todo: enable TLS
-	resp, err := cli.ContainerCreate(ctx, &container.Config{
+	containerConfig := &container.Config{
 		Image: s.image,
 		Env: []string{
 			fmt.Sprintf("REGISTRY_HTTP_ADDR=0.0.0.0:%d", s.port),
@@ -77,11 +82,10 @@ func (s *LocalContainerRegistry) Start() error {
 		ExposedPorts: nat.PortSet{
 			nat.Port(fmt.Sprintf("%d/tcp", s.port)): {},
 		},
-	}, &container.HostConfig{
+	}
+
+	hostConfig := &container.HostConfig{
 		Privileged: true,
-		Binds: []string{
-			s.dataPath + ":/var/lib/registry",
-		},
 		PortBindings: nat.PortMap{
 			nat.Port(fmt.Sprintf("%d/tcp", s.port)): []nat.PortBinding{
 				{
@@ -90,16 +94,29 @@ func (s *LocalContainerRegistry) Start() error {
 				},
 			},
 		},
-	}, nil, nil, "daytona-registry")
+	}
+
+	if s.useNamedVolume {
+		hostConfig.Mounts = []mount.Mount{
+			{
+				Type:   mount.TypeVolume,
+				Source: volumeName,
+				Target: "/var/lib/registry",
+			},
+		}
+	} else {
+		hostConfig.Binds = []string{
+			s.dataPath + ":/var/lib/registry",
+		}
+	}
+
+	//	todo: enable TLS
+	resp, err := cli.ContainerCreate(ctx, containerConfig, hostConfig, nil, nil, "daytona-registry")
 	if err != nil {
 		return err
 	}
 
-	if err := cli.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
-		return err
-	}
-
-	return nil
+	return cli.ContainerStart(ctx, resp.ID, container.StartOptions{})
 }
 
 func RemoveRegistryContainer() error {
@@ -122,10 +139,7 @@ func RemoveRegistryContainer() error {
 					Force: true,
 				}
 
-				if err := cli.ContainerRemove(ctx, c.ID, removeOptions); err != nil {
-					return err
-				}
-				return nil
+				return cli.ContainerRemove(ctx, c.ID, removeOptions)
 			}
 		}
 	}

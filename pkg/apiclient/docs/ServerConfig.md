@@ -17,6 +17,7 @@ Name | Type | Description | Notes
 **LocalBuilderRegistryImage** | Pointer to **string** |  | [optional] 
 **LocalBuilderRegistryPort** | Pointer to **int32** |  | [optional] 
 **LogFilePath** | Pointer to **string** |  | [optional] 
+**PreferNamedVolumes** | Pointer to **bool** |  | [optional] 
 **ProvidersDir** | Pointer to **string** |  | [optional] 
 **RegistryUrl** | Pointer to **string** |  | [optional] 
 **ServerDownloadUrl** | Pointer to **string** |  | [optional] 
@@ -364,6 +365,31 @@ SetLogFilePath sets LogFilePath field to given value.
 `func (o *ServerConfig) HasLogFilePath() bool`
 
 HasLogFilePath returns a boolean if a field has been set.
+
+### GetPreferNamedVolumes
+
+`func (o *ServerConfig) GetPreferNamedVolumes() bool`
+
+GetPreferNamedVolumes returns the PreferNamedVolumes field if non-nil, zero value otherwise.
+
+### GetPreferNamedVolumesOk
+
+`func (o *ServerConfig) GetPreferNamedVolumesOk() (*bool, bool)`
+
+GetPreferNamedVolumesOk returns a tuple with the PreferNamedVolumes field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetPreferNamedVolumes
+
+`func (o *ServerConfig) SetPreferNamedVolumes(v bool)`
+
+SetPreferNamedVolumes sets PreferNamedVolumes field to given value.
+
+### HasPreferNamedVolumes
+
+`func (o *ServerConfig) HasPreferNamedVolumes() bool`
+
+HasPreferNamedVolumes returns a boolean if a field has been set.
 
 ### GetProvidersDir
 

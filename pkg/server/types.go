@@ -46,4 +46,5 @@ type Config struct {
 	LocalBuilderRegistryImage string      `json:"localBuilderRegistryImage"`
 	BuilderRegistryServer     string      `json:"builderRegistryServer"`
 	BuildImageNamespace       string      `json:"buildImageNamespace"`
+	PreferNamedVolumes        bool        `json:"preferNamedVolumes"`
 } // @name ServerConfig

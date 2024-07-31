@@ -1270,6 +1270,7 @@ components:
       example:
         registryUrl: registryUrl
         localBuilderRegistryPort: 5
+        preferNamedVolumes: true
         localBuilderRegistryImage: localBuilderRegistryImage
         defaultProjectUser: defaultProjectUser
         builderRegistryServer: builderRegistryServer
@@ -1314,6 +1315,8 @@ components:
           type: integer
         logFilePath:
           type: string
+        preferNamedVolumes:
+          type: boolean
         providersDir:
           type: string
         registryUrl:

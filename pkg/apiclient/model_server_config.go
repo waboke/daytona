@@ -32,6 +32,7 @@ type ServerConfig struct {
 	LocalBuilderRegistryImage *string     `json:"localBuilderRegistryImage,omitempty"`
 	LocalBuilderRegistryPort  *int32      `json:"localBuilderRegistryPort,omitempty"`
 	LogFilePath               *string     `json:"logFilePath,omitempty"`
+	PreferNamedVolumes        *bool       `json:"preferNamedVolumes,omitempty"`
 	ProvidersDir              *string     `json:"providersDir,omitempty"`
 	RegistryUrl               *string     `json:"registryUrl,omitempty"`
 	ServerDownloadUrl         *string     `json:"serverDownloadUrl,omitempty"`
@@ -470,6 +471,38 @@ func (o *ServerConfig) SetLogFilePath(v string) {
 	o.LogFilePath = &v
 }
 
+// GetPreferNamedVolumes returns the PreferNamedVolumes field value if set, zero value otherwise.
+func (o *ServerConfig) GetPreferNamedVolumes() bool {
+	if o == nil || IsNil(o.PreferNamedVolumes) {
+		var ret bool
+		return ret
+	}
+	return *o.PreferNamedVolumes
+}
+
+// GetPreferNamedVolumesOk returns a tuple with the PreferNamedVolumes field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetPreferNamedVolumesOk() (*bool, bool) {
+	if o == nil || IsNil(o.PreferNamedVolumes) {
+		return nil, false
+	}
+	return o.PreferNamedVolumes, true
+}
+
+// HasPreferNamedVolumes returns a boolean if a field has been set.
+func (o *ServerConfig) HasPreferNamedVolumes() bool {
+	if o != nil && !IsNil(o.PreferNamedVolumes) {
+		return true
+	}
+
+	return false
+}
+
+// SetPreferNamedVolumes gets a reference to the given bool and assigns it to the PreferNamedVolumes field.
+func (o *ServerConfig) SetPreferNamedVolumes(v bool) {
+	o.PreferNamedVolumes = &v
+}
+
 // GetProvidersDir returns the ProvidersDir field value if set, zero value otherwise.
 func (o *ServerConfig) GetProvidersDir() string {
 	if o == nil || IsNil(o.ProvidersDir) {
@@ -614,6 +647,9 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.LogFilePath) {
 		toSerialize["logFilePath"] = o.LogFilePath
+	}
+	if !IsNil(o.PreferNamedVolumes) {
+		toSerialize["preferNamedVolumes"] = o.PreferNamedVolumes
 	}
 	if !IsNil(o.ProvidersDir) {
 		toSerialize["providersDir"] = o.ProvidersDir

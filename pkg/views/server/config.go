@@ -5,6 +5,7 @@ package server
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/internal/util"
@@ -26,6 +27,8 @@ func RenderConfig(config *server.Config) {
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Default Project Image: "), config.DefaultProjectImage) + "\n\n"
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Default Project User: "), config.DefaultProjectUser) + "\n\n"
+
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Prefer Named Volumes: "), strconv.FormatBool(config.PreferNamedVolumes)) + "\n\n"
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("FRPS Domain: "), config.Frps.Domain) + "\n\n"
 
