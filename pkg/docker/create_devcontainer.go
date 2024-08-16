@@ -203,6 +203,10 @@ func (d *DockerClient) createProjectFromDevcontainer(opts *CreateProjectOptions,
 		"--skip-non-blocking-commands",
 	}
 
+	if opts.Project.BuildConfig.CachedBuild != nil {
+		devcontainerCmd = append(devcontainerCmd, "--cache-from", opts.Project.BuildConfig.CachedBuild.Image)
+	}
+
 	if prebuild {
 		devcontainerCmd = append(devcontainerCmd, "--prebuild")
 	}
