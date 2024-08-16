@@ -27,6 +27,13 @@ type ApiDeletePrebuildRequest struct {
 	ApiService        *PrebuildAPIService
 	projectConfigName string
 	prebuildId        string
+	force             *bool
+}
+
+// Force
+func (r ApiDeletePrebuildRequest) Force(force bool) ApiDeletePrebuildRequest {
+	r.force = &force
+	return r
 }
 
 func (r ApiDeletePrebuildRequest) Execute() (*http.Response, error) {
@@ -73,6 +80,9 @@ func (a *PrebuildAPIService) DeletePrebuildExecute(r ApiDeletePrebuildRequest) (
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.force != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

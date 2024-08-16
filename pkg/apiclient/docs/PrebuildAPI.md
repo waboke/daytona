@@ -14,7 +14,7 @@ Method | HTTP request | Description
 
 ## DeletePrebuild
 
-> DeletePrebuild(ctx, projectConfigName, prebuildId).Execute()
+> DeletePrebuild(ctx, projectConfigName, prebuildId).Force(force).Execute()
 
 Delete prebuild
 
@@ -35,10 +35,11 @@ import (
 func main() {
 	projectConfigName := "projectConfigName_example" // string | Project config name
 	prebuildId := "prebuildId_example" // string | Prebuild ID
+	force := true // bool | Force (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), projectConfigName, prebuildId).Execute()
+	r, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), projectConfigName, prebuildId).Force(force).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.DeletePrebuild``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -64,6 +65,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
+ **force** | **bool** | Force | 
 
 ### Return type
 

@@ -4,8 +4,10 @@
 package prebuild
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
@@ -114,6 +116,7 @@ func ListPrebuilds(ctx *gin.Context) {
 //	@Accept			json
 //	@Param			projectConfigName	path	string	true	"Project config name"
 //	@Param			prebuildId			path	string	true	"Prebuild ID"
+//	@Param			force				query	bool	false	"Force"
 //	@Success		204
 //	@Router			/project-config/prebuild/{projectConfigName}/{prebuildId} [delete]
 //
@@ -121,9 +124,21 @@ func ListPrebuilds(ctx *gin.Context) {
 func DeletePrebuild(ctx *gin.Context) {
 	projectConfigName := ctx.Param("projectConfigName")
 	prebuildId := ctx.Param("prebuildId")
+	forceQuery := ctx.Query("force")
+
+	var err error
+	var force bool
+
+	if forceQuery != "" {
+		force, err = strconv.ParseBool(forceQuery)
+		if err != nil {
+			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for force flag"))
+			return
+		}
+	}
 
 	server := server.GetInstance(nil)
-	err := server.ProjectConfigService.DeletePrebuild(projectConfigName, prebuildId)
+	err = server.ProjectConfigService.DeletePrebuild(projectConfigName, prebuildId, force)
 	if err != nil {
 		if config.IsPrebuildNotFound(err) {
 			ctx.Status(204)

@@ -31,7 +31,7 @@ func (s *GitProviderService) UnregisterPrebuildWebhook(gitProviderId string, rep
 
 	err = gitProvider.UnregisterPrebuildWebhook(repo, id)
 	if err != nil {
-		return fmt.Errorf("failed to unregister webook: %s", err.Error())
+		return fmt.Errorf("failed to unregister webhook: %s", err.Error())
 	}
 
 	return nil

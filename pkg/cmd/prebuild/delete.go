@@ -15,6 +15,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var forceFlag bool
+
 var prebuildDeleteCmd = &cobra.Command{
 	Use:     "delete",
 	Short:   "Delete a prebuild configuration",
@@ -51,11 +53,15 @@ var prebuildDeleteCmd = &cobra.Command{
 			}
 		}
 
-		res, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), selectedPrebuild.ProjectConfigName, selectedPrebuildId).Execute()
+		res, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), selectedPrebuild.ProjectConfigName, selectedPrebuildId).Force(forceFlag).Execute()
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
 		views.RenderInfoMessage("Project config deleted successfully")
 	},
+}
+
+func init() {
+	prebuildDeleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force delete prebuild")
 }

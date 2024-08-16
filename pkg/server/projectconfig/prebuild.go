@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
+	log "github.com/sirupsen/logrus"
 )
 
 func (s *ProjectConfigService) SetPrebuild(createPrebuildDto dto.CreatePrebuildDTO) (*dto.PrebuildDTO, error) {
@@ -28,7 +29,7 @@ func (s *ProjectConfigService) SetPrebuild(createPrebuildDto dto.CreatePrebuildD
 		return nil, err
 	}
 
-	if existingPrebuild != nil {
+	if existingPrebuild != nil && createPrebuildDto.Id != existingPrebuild.Id {
 		return nil, fmt.Errorf("prebuild for the specified project config and branch already exists")
 	}
 
@@ -101,7 +102,7 @@ func (s *ProjectConfigService) SetPrebuild(createPrebuildDto dto.CreatePrebuildD
 	}, nil
 }
 
-func (s *ProjectConfigService) DeletePrebuild(projectConfigName string, id string) error {
+func (s *ProjectConfigService) DeletePrebuild(projectConfigName string, id string, force bool) error {
 	projectConfig, err := s.Find(&config.Filter{
 		Name: &projectConfigName,
 	})
@@ -124,22 +125,36 @@ func (s *ProjectConfigService) DeletePrebuild(projectConfigName string, id strin
 		if projectConfig.WebhookId != nil {
 			err = s.gitProviderService.UnregisterPrebuildWebhook(gitProviderId, repository, *projectConfig.WebhookId)
 			if err != nil {
-				return err
+				if force {
+					log.Error(err)
+				} else {
+					return err
+				}
 			}
 		}
+
+		projectConfig.WebhookId = nil
 	}
 
 	prebuildBuilds, err := s.buildService.List(&build.Filter{
 		PrebuildIds: &[]string{id},
 	})
 	if err != nil {
-		return err
+		if force {
+			log.Error(err)
+		} else {
+			return err
+		}
 	}
 
 	for _, build := range prebuildBuilds {
 		err = s.buildService.Delete(build.Id)
 		if err != nil {
-			return err
+			if force {
+				log.Error(err)
+			} else {
+				return err
+			}
 		}
 	}
 
@@ -245,7 +260,15 @@ func (s *ProjectConfigService) ProcessGitEvent(data gitprovider.GitEventData) er
 			GetNewest:   util.Pointer(true),
 		})
 		if err != nil {
-			return err
+			buildsToTrigger = append(buildsToTrigger, build.Build{
+				Image:       projectConfig.Image,
+				User:        projectConfig.User,
+				BuildConfig: projectConfig.BuildConfig,
+				Repository:  repo,
+				EnvVars:     projectConfig.EnvVars,
+				PrebuildId:  prebuild.Id,
+			})
+			continue
 		}
 
 		commitsRange, err := gitProvider.GetCommitsRange(repo, data.Owner, newestBuild.Repository.Sha, data.Sha)
@@ -253,8 +276,10 @@ func (s *ProjectConfigService) ProcessGitEvent(data gitprovider.GitEventData) er
 			return err
 		}
 
+		fmt.Println("commitsRange", commitsRange)
+
 		// Check if the commit interval has been reached
-		if commitsRange > prebuild.CommitInterval {
+		if commitsRange >= prebuild.CommitInterval {
 			buildsToTrigger = append(buildsToTrigger, build.Build{
 				Image:       projectConfig.Image,
 				User:        projectConfig.User,

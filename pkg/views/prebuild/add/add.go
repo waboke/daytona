@@ -24,7 +24,9 @@ type PrebuildAddView struct {
 }
 
 func PrebuildCreationView(prebuildAddView *PrebuildAddView, editing bool) {
-	prebuildAddView.CommitInterval = DEFAULT_COMMIT_INTERVAL
+	if prebuildAddView.CommitInterval == "" {
+		prebuildAddView.CommitInterval = DEFAULT_COMMIT_INTERVAL
+	}
 	triggerFilesInput := ""
 
 	for _, triggerFile := range prebuildAddView.TriggerFiles {

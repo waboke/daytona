@@ -4,6 +4,8 @@
 package db
 
 import (
+	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/daytonaio/daytona/pkg/build"
@@ -100,14 +102,28 @@ func processBuildFilters(tx *gorm.DB, filter *build.Filter) *gorm.DB {
 			tx = tx.Where("hash = ?", *filter.Hash)
 		}
 		if filter.States != nil {
-			tx = tx.Where("state IN ?", filter.States)
+			placeholders := strings.Repeat("?,", len(filter.States))
+			placeholders = placeholders[:len(placeholders)-1]
+
+			tx = tx.Where(fmt.Sprintf("state IN (%s)", placeholders), filter.StatesToInterface()...)
 		}
 		if filter.PrebuildIds != nil {
-			tx = tx.Where("prebuild_id IN ?", filter.PrebuildIds)
+			placeholders := strings.Repeat("?,", len(*filter.PrebuildIds))
+			placeholders = placeholders[:len(placeholders)-1]
+
+			tx = tx.Where(fmt.Sprintf("prebuild_id IN (%s)", placeholders), stringsToInterface(*filter.PrebuildIds)...)
 		}
 		if filter.GetNewest != nil && *filter.GetNewest {
 			tx = tx.Order("created_at desc").Limit(1)
 		}
 	}
 	return tx
+}
+
+func stringsToInterface(slice []string) []interface{} {
+	args := make([]interface{}, len(slice))
+	for i, v := range slice {
+		args[i] = v
+	}
+	return args
 }

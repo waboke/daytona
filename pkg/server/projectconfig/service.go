@@ -17,11 +17,11 @@ type IProjectConfigService interface {
 	Find(filter *config.Filter) (*config.ProjectConfig, error)
 	List(filter *config.Filter) ([]*config.ProjectConfig, error)
 	SetDefault(projectConfigName string) error
-	Delete(projectConfigName string) error
+	Delete(projectConfigName string, force bool) error
 	SetPrebuild(dto.CreatePrebuildDTO) (*dto.PrebuildDTO, error)
 	FindPrebuild(projectConfigFilter *config.Filter, prebuildFilter *config.PrebuildFilter) (*dto.PrebuildDTO, error)
 	ListPrebuilds(projectConfigFilter *config.Filter, prebuildFilter *config.PrebuildFilter) ([]*dto.PrebuildDTO, error)
-	DeletePrebuild(projectConfigName string, id string) error
+	DeletePrebuild(projectConfigName string, id string, force bool) error
 	ProcessGitEvent(gitprovider.GitEventData) error
 }
 
@@ -95,7 +95,7 @@ func (s *ProjectConfigService) Save(projectConfig *config.ProjectConfig) error {
 	return s.SetDefault(projectConfig.Name)
 }
 
-func (s *ProjectConfigService) Delete(projectConfigName string) error {
+func (s *ProjectConfigService) Delete(projectConfigName string, force bool) error {
 	pc, err := s.Find(&config.Filter{
 		Name: &projectConfigName,
 	})
@@ -105,7 +105,7 @@ func (s *ProjectConfigService) Delete(projectConfigName string) error {
 
 	// DeletePrebuild handles deleting the builds and removing the webhook
 	for _, prebuild := range pc.Prebuilds {
-		err := s.DeletePrebuild(pc.Name, prebuild.Id)
+		err := s.DeletePrebuild(pc.Name, prebuild.Id, force)
 		if err != nil {
 			return err
 		}

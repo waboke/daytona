@@ -20,8 +20,8 @@ func NewMockProjectConfigService() *mockProjectConfigService {
 	return &mockProjectConfigService{}
 }
 
-func (m *mockProjectConfigService) Delete(name string) error {
-	args := m.Called(name)
+func (m *mockProjectConfigService) Delete(name string, force bool) error {
+	args := m.Called(name, force)
 	return args.Error(0)
 }
 
@@ -60,8 +60,8 @@ func (m *mockProjectConfigService) ListPrebuilds(projectConfigFilter *config.Fil
 	return args.Get(0).([]*dto.PrebuildDTO), args.Error(1)
 }
 
-func (m *mockProjectConfigService) DeletePrebuild(projectConfigName string, id string) error {
-	args := m.Called(projectConfigName, id)
+func (m *mockProjectConfigService) DeletePrebuild(projectConfigName string, id string, force bool) error {
+	args := m.Called(projectConfigName, id, force)
 	return args.Error(0)
 }
 

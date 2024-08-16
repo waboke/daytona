@@ -110,7 +110,6 @@ func filterPrebuild(pb *PrebuildConfig, filter *PrebuildFilter) *PrebuildConfig 
 		if string(triggerFilesJson) != string(filterFilesJson) {
 			return nil
 		}
-
 	}
 
 	return pb

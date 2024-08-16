@@ -5,13 +5,13 @@ package gitprovider
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
+	"errors"
 	"net/url"
 	"strconv"
 	"strings"
 
 	"github.com/google/go-github/github"
-	"github.com/mitchellh/mapstructure"
 	"golang.org/x/oauth2"
 )
 
@@ -383,28 +383,30 @@ func (g *GitHubGitProvider) GetCommitsRange(repo *GitRepository, owner string, i
 }
 
 func (g *GitHubGitProvider) ParseEventData(webhookRequestPayload map[string]interface{}) (*GitEventData, error) {
-	event := new(github.PushEvent)
-	err := mapstructure.Decode(webhookRequestPayload, &event)
+	webhookRequestBytes, err := json.Marshal(webhookRequestPayload)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse webhook request payload: %v", err)
+		return nil, errors.New("failed to marshal webhook request payload")
+	}
+
+	var payload github.WebHookPayload
+	err = json.Unmarshal(webhookRequestBytes, &payload)
+	if err != nil {
+		return nil, errors.New("failed to unmarshal webhook request payload")
 	}
 
 	var owner string
-
-	if event != nil && event.Repo != nil && event.Repo.Owner != nil && event.Repo.Owner.Name != nil {
-		owner = *event.Repo.Owner.Name
+	if payload.Repo != nil && payload.Repo.Owner != nil && payload.Repo.Owner.Name != nil {
+		owner = *payload.Repo.Owner.Name
 	}
 
-	// Extract necessary information from the PushEvent
 	gitEventData := &GitEventData{
-		Url:    event.Repo.GetHTMLURL(),
-		Branch: strings.TrimPrefix(event.GetRef(), "refs/heads/"),
-		Sha:    event.HeadCommit.GetID(),
+		Url:    strings.ToLower(payload.Repo.GetHTMLURL()),
+		Branch: strings.TrimPrefix(payload.GetRef(), "refs/heads/"),
+		Sha:    payload.HeadCommit.GetID(),
 		Owner:  owner,
 	}
 
-	// Extract affected files from the commits
-	for _, commit := range event.Commits {
+	for _, commit := range payload.Commits {
 		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Added...)
 		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Modified...)
 		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Removed...)

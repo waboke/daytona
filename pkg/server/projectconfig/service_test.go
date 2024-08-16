@@ -149,7 +149,7 @@ func (s *ProjectConfigServiceTestSuite) TestDelete() {
 
 	require := s.Require()
 
-	err := s.projectConfigService.Delete(projectConfig3.Name)
+	err := s.projectConfigService.Delete(projectConfig3.Name, false)
 	require.Nil(err)
 
 	projectConfigs, err := s.projectConfigService.List(nil)

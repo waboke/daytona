@@ -902,6 +902,12 @@ const docTemplate = `{
                         "name": "prebuildId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -954,6 +960,12 @@ const docTemplate = `{
                         "name": "configName",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
                     }
                 ],
                 "responses": {

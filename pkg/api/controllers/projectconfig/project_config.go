@@ -4,9 +4,11 @@
 package projectconfig
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
@@ -164,12 +166,25 @@ func SetDefaultProjectConfig(ctx *gin.Context) {
 //	@Summary		Delete project config data
 //	@Description	Delete project config data
 //	@Param			configName	path	string	true	"Config name"
+//	@Param			force		query	bool	false	"Force"
 //	@Success		204
 //	@Router			/project-config/{configName} [delete]
 //
 //	@id				DeleteProjectConfig
 func DeleteProjectConfig(ctx *gin.Context) {
 	configName := ctx.Param("configName")
+	forceQuery := ctx.Query("force")
+
+	var err error
+	var force bool
+
+	if forceQuery != "" {
+		force, err = strconv.ParseBool(forceQuery)
+		if err != nil {
+			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for force flag"))
+			return
+		}
+	}
 
 	server := server.GetInstance(nil)
 
@@ -181,7 +196,7 @@ func DeleteProjectConfig(ctx *gin.Context) {
 		return
 	}
 
-	err = server.ProjectConfigService.Delete(projectConfig.Name)
+	err = server.ProjectConfigService.Delete(projectConfig.Name, force)
 	if err != nil {
 		if config.IsProjectConfigNotFound(err) {
 			ctx.Status(204)

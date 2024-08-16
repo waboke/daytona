@@ -1237,6 +1237,10 @@ paths:
         name: configName
         required: true
         type: string
+      - description: Force
+        in: query
+        name: force
+        type: boolean
       responses:
         "204":
           description: No Content
@@ -1375,6 +1379,10 @@ paths:
         name: prebuildId
         required: true
         type: string
+      - description: Force
+        in: query
+        name: force
+        type: boolean
       responses:
         "204":
           description: No Content
