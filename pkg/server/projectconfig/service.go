@@ -102,5 +102,14 @@ func (s *ProjectConfigService) Delete(projectConfigName string) error {
 	if err != nil {
 		return err
 	}
+
+	// DeletePrebuild handles deleting the builds and removing the webhook
+	for _, prebuild := range pc.Prebuilds {
+		err := s.DeletePrebuild(pc.Name, prebuild.Id)
+		if err != nil {
+			return err
+		}
+	}
+
 	return s.configStore.Delete(pc)
 }

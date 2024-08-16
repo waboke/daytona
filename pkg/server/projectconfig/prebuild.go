@@ -129,6 +129,20 @@ func (s *ProjectConfigService) DeletePrebuild(projectConfigName string, id strin
 		}
 	}
 
+	prebuildBuilds, err := s.buildService.List(&build.Filter{
+		PrebuildIds: &[]string{id},
+	})
+	if err != nil {
+		return err
+	}
+
+	for _, build := range prebuildBuilds {
+		err = s.buildService.Delete(build.Id)
+		if err != nil {
+			return err
+		}
+	}
+
 	err = projectConfig.RemovePrebuild(id)
 	if err != nil {
 		return err
