@@ -6,7 +6,7 @@ package build_test
 import (
 	"testing"
 
-	t_build "github.com/daytonaio/daytona/internal/testing/server/build"
+	t_build "github.com/daytonaio/daytona/internal/testing/build"
 	"github.com/daytonaio/daytona/internal/testing/server/workspaces/mocks"
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -20,7 +20,7 @@ type BuildRunnerTestSuite struct {
 	mockBuilder        mocks.MockBuilder
 	mockScheduler      mocks.MockScheduler
 	loggerFactory      logs.LoggerFactory
-	buildStore         build.Store
+	mockBuildStore     build.Store
 	Runner             build.BuildRunner
 }
 
@@ -35,14 +35,14 @@ func TestBuildRunner(t *testing.T) {
 	s.mockBuilder = mocks.MockBuilder{}
 	s.mockScheduler = mocks.MockScheduler{}
 
-	s.buildStore = t_build.NewInMemoryBuildStore()
+	s.mockBuildStore = t_build.NewInMemoryBuildStore()
 	s.loggerFactory = logs.NewLoggerFactory(t.TempDir())
 
 	s.Runner = *build.NewBuildRunner(build.BuildRunnerInstanceConfig{
 		Interval:         "0 */5 * * * *",
 		Scheduler:        &s.mockScheduler,
 		BuildRunnerId:    "1",
-		BuildStore:       s.buildStore,
+		BuildStore:       s.mockBuildStore,
 		BuilderFactory:   &s.mockBuilderFactory,
 		LoggerFactory:    s.loggerFactory,
 		TelemetryEnabled: false,
@@ -52,7 +52,7 @@ func TestBuildRunner(t *testing.T) {
 }
 
 func (s *BuildRunnerTestSuite) SetupTest() {
-	err := s.buildStore.Save(mocks.MockBuild)
+	err := s.mockBuildStore.Save(mocks.MockBuild)
 	if err != nil {
 		s.T().Fatal(err)
 	}

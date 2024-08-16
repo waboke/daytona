@@ -70,7 +70,7 @@ func (b *DevcontainerBuilder) CleanUp() error {
 }
 
 func (b *DevcontainerBuilder) Publish(build Build) error {
-	buildLogger := b.loggerFactory.CreateBuildLogger(build.Project.Name, build.Id, logs.LogSourceBuilder)
+	buildLogger := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
 	defer buildLogger.Close()
 
 	cliBuilder, err := b.getBuilderDockerClient()
@@ -82,16 +82,11 @@ func (b *DevcontainerBuilder) Publish(build Build) error {
 		ApiClient: cliBuilder,
 	})
 
-	cr, err := b.containerRegistryService.Find(b.containerRegistryServer)
-	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
-		return err
-	}
-
-	return dockerClient.PushImage(build.Image, cr, buildLogger)
+	return dockerClient.PushImage(build.Image, &b.containerRegistry, buildLogger)
 }
 
 func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, error) {
-	buildLogger := b.loggerFactory.CreateBuildLogger(build.Project.Name, build.Id, logs.LogSourceBuilder)
+	buildLogger := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
 	defer buildLogger.Close()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -104,8 +99,8 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 	})
 
 	cmd := []string{"devcontainer", "up", "--prebuild", "--workspace-folder", "/project"}
-	if build.Project.BuildConfig.Devcontainer.FilePath != "" {
-		cmd = append(cmd, "--config", filepath.Join("/project", build.Project.BuildConfig.Devcontainer.FilePath))
+	if build.BuildConfig.Devcontainer.FilePath != "" {
+		cmd = append(cmd, "--config", filepath.Join("/project", build.BuildConfig.Devcontainer.FilePath))
 	}
 
 	execConfig := types.ExecConfig{
@@ -161,9 +156,9 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 		return b.defaultProjectImage, b.defaultProjectUser, err
 	}
 
-	tag := build.Project.Repository.Sha
+	tag := build.Repository.Sha
 	namespace := b.buildImageNamespace
-	imageName := fmt.Sprintf("%s%s/p-%s:%s", b.containerRegistryServer, namespace, b.id, tag)
+	imageName := fmt.Sprintf("%s%s/p-%s:%s", b.containerRegistry.Server, namespace, b.id, tag)
 
 	_, err = builderCli.ContainerCommit(context.Background(), buildOutcome.ContainerId, container.CommitOptions{
 		Reference: imageName,
@@ -178,7 +173,7 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 func (b *DevcontainerBuilder) startContainer(build Build) error {
 	ctx := context.Background()
 
-	buildLogger := b.loggerFactory.CreateBuildLogger(build.Project.Name, build.Id, logs.LogSourceBuilder)
+	buildLogger := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
 	defer buildLogger.Close()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -190,17 +185,12 @@ func (b *DevcontainerBuilder) startContainer(build Build) error {
 		ApiClient: cli,
 	})
 
-	cr, err := b.containerRegistryService.FindByImageName(b.image)
-	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
-		return err
-	}
-
-	err = dockerClient.PullImage(b.image, cr, buildLogger)
+	err = dockerClient.PullImage(b.image, &b.containerRegistry, buildLogger)
 	if err != nil {
 		return err
 	}
 
-	serverHost, err := containerregistry.GetServerHostname(b.containerRegistryServer)
+	serverHost, err := containerregistry.GetServerHostname(b.containerRegistry.Server)
 	if err != nil {
 		return err
 	}

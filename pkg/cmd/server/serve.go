@@ -14,10 +14,12 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal"
+	"github.com/daytonaio/daytona/internal/constants"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/build"
+	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/db"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
@@ -25,6 +27,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
+	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
@@ -170,6 +173,10 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 	if err != nil {
 		return nil, err
 	}
+	buildStore, err := db.NewBuildStore(dbConnection)
+	if err != nil {
+		log.Fatal(err)
+	}
 	projectConfigStore, err := db.NewProjectConfigStore(dbConnection)
 	if err != nil {
 		return nil, err
@@ -207,8 +214,21 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 		Store: containerRegistryStore,
 	})
 
-	projectConfigService := projectconfig.NewConfigService(projectconfig.ProjectConfigServiceConfig{
-		ConfigStore: projectConfigStore,
+	buildService := builds.NewBuildService(builds.BuildServiceConfig{
+		BuildStore: buildStore,
+	})
+
+	gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
+		ConfigStore: gitProviderConfigStore,
+	})
+
+	prebuildWebhookEndpoint := fmt.Sprintf("%s%s", util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain), constants.WEBHOOK_EVENT_ROUTE)
+
+	projectConfigService := projectconfig.NewProjectConfigService(projectconfig.ProjectConfigServiceConfig{
+		PrebuildWebhookEndpoint: prebuildWebhookEndpoint,
+		ConfigStore:             projectConfigStore,
+		BuildService:            buildService,
+		GitProviderService:      gitProviderService,
 	})
 
 	var localContainerRegistry server.ILocalContainerRegistry
@@ -261,16 +281,13 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 		ProviderManager: providerManager,
 	})
 
-	gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
-		ConfigStore: gitProviderConfigStore,
-	})
-
 	workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
 		WorkspaceStore:           workspaceStore,
 		TargetStore:              providerTargetStore,
 		ApiKeyService:            apiKeyService,
 		GitProviderService:       gitProviderService,
 		ContainerRegistryService: containerRegistryService,
+		BuildService:             buildService,
 		ProjectConfigService:     projectConfigService,
 		ServerApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 		ServerUrl:                headscaleUrl,
@@ -290,6 +307,7 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 		TailscaleServer:          headscaleServer,
 		ProviderTargetService:    providerTargetService,
 		ContainerRegistryService: containerRegistryService,
+		BuildService:             buildService,
 		ProjectConfigService:     projectConfigService,
 		LocalContainerRegistry:   localContainerRegistry,
 		ApiKeyService:            apiKeyService,
@@ -335,15 +353,25 @@ func getBuildRunner(c *server.Config, buildRunnerConfig *build.Config, configDir
 		Store: containerRegistryStore,
 	})
 
+	var builderRegistry *containerregistry.ContainerRegistry
+
+	if c.BuilderRegistryServer != "local" {
+		builderRegistry, err = containerRegistryService.Find(c.BuilderRegistryServer)
+		if err != nil {
+			builderRegistry = &containerregistry.ContainerRegistry{
+				Server: c.BuilderRegistryServer,
+			}
+		}
+	}
+
 	builderFactory := build.NewBuilderFactory(build.BuilderFactoryConfig{
-		ContainerRegistryServer:  c.BuilderRegistryServer,
-		BuildImageNamespace:      buildImageNamespace,
-		BuildStore:               buildStore,
-		LoggerFactory:            loggerFactory,
-		DefaultProjectImage:      c.DefaultProjectImage,
-		DefaultProjectUser:       c.DefaultProjectUser,
-		Image:                    c.BuilderImage,
-		ContainerRegistryService: containerRegistryService,
+		ContainerRegistry:   *builderRegistry,
+		BuildImageNamespace: buildImageNamespace,
+		BuildStore:          buildStore,
+		LoggerFactory:       loggerFactory,
+		DefaultProjectImage: c.DefaultProjectImage,
+		DefaultProjectUser:  c.DefaultProjectUser,
+		Image:               c.BuilderImage,
 	})
 
 	return build.NewBuildRunner(build.BuildRunnerInstanceConfig{

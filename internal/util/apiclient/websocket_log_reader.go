@@ -67,6 +67,29 @@ func ReadWorkspaceLogs(activeProfile config.Profile, workspaceId string, project
 	wg.Wait()
 }
 
+func ReadBuildLogs(activeProfile config.Profile, buildId string, query string, stopLogs *bool) {
+	var wg sync.WaitGroup
+
+	logs_view.CalculateLongestPrefixLength([]string{buildId})
+
+	for {
+		ws, _, err := GetWebsocketConn(fmt.Sprintf("/log/build/%s", buildId), &activeProfile, &query)
+		// We want to retry getting the logs if it fails
+		if err != nil {
+			// TODO: return log.Trace once https://github.com/daytonaio/daytona/issues/696 is resolved
+			// log.Trace(apiclient_util.HandleErrorResponse(res, err))
+			time.Sleep(250 * time.Millisecond)
+			continue
+		}
+
+		readJSONLog(ws, stopLogs, logs_view.WORKSPACE_INDEX)
+		ws.Close()
+		break
+	}
+
+	wg.Wait()
+}
+
 func readJSONLog(ws *websocket.Conn, stopLogs *bool, index int) {
 	logEntriesChan := make(chan logs.LogEntry)
 	go logs_view.DisplayLogs(logEntriesChan, index)

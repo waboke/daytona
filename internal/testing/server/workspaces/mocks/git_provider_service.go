@@ -6,6 +6,8 @@
 package mocks
 
 import (
+	"net/http"
+
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/stretchr/testify/mock"
 )
@@ -26,6 +28,11 @@ func (m *MockGitProviderService) GetConfig(id string) (*gitprovider.GitProviderC
 func (m *MockGitProviderService) GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error) {
 	args := m.Called(url)
 	return args.Get(0).(*gitprovider.GitProviderConfig), args.Error(1)
+}
+
+func (m *MockGitProviderService) GetGitProviderForHttpRequest(req *http.Request) (gitprovider.GitProvider, error) {
+	args := m.Called(req)
+	return args.Get(0).(gitprovider.GitProvider), args.Error(1)
 }
 
 func (m *MockGitProviderService) GetGitProvider(id string) (gitprovider.GitProvider, error) {
@@ -81,4 +88,14 @@ func (m *MockGitProviderService) SetGitProviderConfig(providerConfig *gitprovide
 func (m *MockGitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (string, error) {
 	args := m.Called(repo)
 	return args.String(0), args.Error(1)
+}
+
+func (m *MockGitProviderService) RegisterPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (string, error) {
+	args := m.Called(gitProviderId, repo, endpointUrl)
+	return args.String(0), args.Error(1)
+}
+
+func (m *MockGitProviderService) UnregisterPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, id string) error {
+	args := m.Called(gitProviderId, repo, id)
+	return args.Error(0)
 }

@@ -5,11 +5,13 @@ package gitprovider
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
 
 	"github.com/google/go-github/github"
+	"github.com/mitchellh/mapstructure"
 	"golang.org/x/oauth2"
 )
 
@@ -338,4 +340,75 @@ func (g *GitHubGitProvider) parseStaticGitContext(repoUrl string) (*StaticGitCon
 	}
 
 	return staticContext, nil
+}
+
+func (g *GitHubGitProvider) RegisterPrebuildWebhook(repo *GitRepository, endpointUrl string) (string, error) {
+	client := g.getApiClient()
+
+	hook, _, err := client.Repositories.CreateHook(context.Background(), repo.Owner, repo.Name, &github.Hook{
+		Active: github.Bool(true),
+		Events: []string{"push"},
+		Config: map[string]interface{}{
+			"url":          endpointUrl,
+			"content_type": "json",
+		},
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return strconv.Itoa(int(*hook.ID)), nil
+}
+
+func (g *GitHubGitProvider) UnregisterPrebuildWebhook(repo *GitRepository, id string) error {
+	client := g.getApiClient()
+
+	idInt, _ := strconv.Atoi(id)
+
+	_, err := client.Repositories.DeleteHook(context.Background(), repo.Owner, repo.Name, int64(idInt))
+
+	return err
+}
+
+func (g *GitHubGitProvider) GetCommitsRange(repo *GitRepository, owner string, initialSha string, currentSha string) (int, error) {
+	client := g.getApiClient()
+
+	commits, _, err := client.Repositories.CompareCommits(context.Background(), owner, repo.Name, initialSha, currentSha)
+	if err != nil {
+		return 0, err
+	}
+
+	return len(commits.Commits), nil
+}
+
+func (g *GitHubGitProvider) ParseEventData(webhookRequestPayload map[string]interface{}) (*GitEventData, error) {
+	event := new(github.PushEvent)
+	err := mapstructure.Decode(webhookRequestPayload, &event)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse webhook request payload: %v", err)
+	}
+
+	var owner string
+
+	if event != nil && event.Repo != nil && event.Repo.Owner != nil && event.Repo.Owner.Name != nil {
+		owner = *event.Repo.Owner.Name
+	}
+
+	// Extract necessary information from the PushEvent
+	gitEventData := &GitEventData{
+		Url:    event.Repo.GetHTMLURL(),
+		Branch: strings.TrimPrefix(event.GetRef(), "refs/heads/"),
+		Sha:    event.HeadCommit.GetID(),
+		Owner:  owner,
+	}
+
+	// Extract affected files from the commits
+	for _, commit := range event.Commits {
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Added...)
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Modified...)
+		gitEventData.AffectedFiles = append(gitEventData.AffectedFiles, commit.Removed...)
+	}
+
+	return gitEventData, nil
 }

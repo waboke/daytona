@@ -41,7 +41,7 @@ var CreateCmd = &cobra.Command{
 	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
-		var projects []apiclient.CreateProjectConfigDTO
+		var projects []apiclient.CreateProjectDTO
 		var workspaceName string
 		var existingWorkspaceNames []string
 		var existingProjectConfigName *string
@@ -107,7 +107,7 @@ var CreateCmd = &cobra.Command{
 
 		projectNames := []string{}
 		for i := range projects {
-			projects[i].EnvVars = *workspace_util.GetEnvVariables(&projects[i], profileData)
+			projects[i].EnvVars = *workspace_util.GetEnvVariables(projects[i].EnvVars, profileData)
 			projectNames = append(projectNames, projects[i].Name)
 		}
 
@@ -278,7 +278,7 @@ func getTarget(activeProfileName string) (*apiclient.ProviderTarget, error) {
 	return target.GetTargetFromPrompt(targets, activeProfileName, false)
 }
 
-func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectConfigDTO, workspaceNames []string, ctx context.Context) error {
+func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectDTO, workspaceNames []string, ctx context.Context) error {
 	if builderFlag != "" || customImageFlag != "" || customImageUserFlag != "" || devcontainerPathFlag != "" {
 		return fmt.Errorf("please provide the repository URL in order to set up custom project details through CLI")
 	}
@@ -340,7 +340,7 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 	return nil
 }
 
-func processCmdArgument(argument string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectConfigDTO, ctx context.Context) (*string, error) {
+func processCmdArgument(argument string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO, ctx context.Context) (*string, error) {
 	if builderFlag != "" && builderFlag != create.DEVCONTAINER && devcontainerPathFlag != "" {
 		return nil, fmt.Errorf("can't set devcontainer file path if builder is not set to %s", create.DEVCONTAINER)
 	}
@@ -362,7 +362,7 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, project
 	return workspace_util.AddProjectFromConfig(projectConfig, apiClient, projects, branchFlag)
 }
 
-func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectConfigDTO, ctx context.Context) (*string, error) {
+func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO, ctx context.Context) (*string, error) {
 	encodedURLParam := url.QueryEscape(repoUrl)
 
 	if !blankFlag {
@@ -390,12 +390,12 @@ func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]a
 		return nil, err
 	}
 
-	project := &apiclient.CreateProjectConfigDTO{
+	project := &apiclient.CreateProjectDTO{
 		Name: projectName,
-		Source: apiclient.CreateProjectConfigSourceDTO{
+		Source: apiclient.CreateProjectSourceDTO{
 			Repository: *repoResponse,
 		},
-		BuildConfig: &apiclient.ProjectBuildConfig{},
+		BuildConfig: &apiclient.BuildConfig{},
 	}
 
 	if builderFlag == create.DEVCONTAINER || devcontainerPathFlag != "" {

@@ -5,28 +5,46 @@ package projectconfig
 
 import (
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/server/builds"
+	"github.com/daytonaio/daytona/pkg/server/gitproviders"
+	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 )
 
 type IProjectConfigService interface {
-	Delete(projectConfigName string) error
+	Save(projectConfig *config.ProjectConfig) error
 	Find(filter *config.Filter) (*config.ProjectConfig, error)
 	List(filter *config.Filter) ([]*config.ProjectConfig, error)
 	SetDefault(projectConfigName string) error
-	Save(projectConfig *config.ProjectConfig) error
+	Delete(projectConfigName string) error
+	SetPrebuild(dto.CreatePrebuildDTO) (*dto.PrebuildDTO, error)
+	FindPrebuild(projectConfigFilter *config.Filter, prebuildFilter *config.PrebuildFilter) (*dto.PrebuildDTO, error)
+	ListPrebuilds(projectConfigFilter *config.Filter, prebuildFilter *config.PrebuildFilter) ([]*dto.PrebuildDTO, error)
+	DeletePrebuild(projectConfigName string, id string) error
+	ProcessGitEvent(gitprovider.GitEventData) error
 }
 
 type ProjectConfigServiceConfig struct {
-	ConfigStore config.Store
+	PrebuildWebhookEndpoint string
+	ConfigStore             config.Store
+	BuildService            builds.IBuildService
+	GitProviderService      gitproviders.IGitProviderService
 }
 
 type ProjectConfigService struct {
-	configStore config.Store
+	prebuildWebhookEndpoint string
+	configStore             config.Store
+	buildService            builds.IBuildService
+	gitProviderService      gitproviders.IGitProviderService
 }
 
-func NewConfigService(config ProjectConfigServiceConfig) IProjectConfigService {
+func NewProjectConfigService(config ProjectConfigServiceConfig) IProjectConfigService {
 	return &ProjectConfigService{
-		configStore: config.ConfigStore,
+		prebuildWebhookEndpoint: config.PrebuildWebhookEndpoint,
+		configStore:             config.ConfigStore,
+		buildService:            config.BuildService,
+		gitProviderService:      config.GitProviderService,
 	}
 }
 
@@ -43,7 +61,7 @@ func (s *ProjectConfigService) SetDefault(projectConfigName string) error {
 	}
 
 	defaultProjectConfig, err := s.Find(&config.Filter{
-		Url:     &projectConfig.Repository.Url,
+		Url:     &projectConfig.RepositoryUrl,
 		Default: util.Pointer(true),
 	})
 	if err != nil && err != config.ErrProjectConfigNotFound {
@@ -67,9 +85,7 @@ func (s *ProjectConfigService) Find(filter *config.Filter) (*config.ProjectConfi
 }
 
 func (s *ProjectConfigService) Save(projectConfig *config.ProjectConfig) error {
-	if projectConfig.Repository != nil && projectConfig.Repository.Url != "" {
-		projectConfig.Repository.Url = util.CleanUpRepositoryUrl(projectConfig.Repository.Url)
-	}
+	projectConfig.RepositoryUrl = util.CleanUpRepositoryUrl(projectConfig.RepositoryUrl)
 
 	err := s.configStore.Save(projectConfig)
 	if err != nil {

@@ -80,6 +80,7 @@ Class | Method | HTTP request | Description
 *ApiKeyAPI* | [**GenerateApiKey**](docs/ApiKeyAPI.md#generateapikey) | **Post** /apikey/{apiKeyName} | Generate an API key
 *ApiKeyAPI* | [**ListClientApiKeys**](docs/ApiKeyAPI.md#listclientapikeys) | **Get** /apikey | List API keys
 *ApiKeyAPI* | [**RevokeApiKey**](docs/ApiKeyAPI.md#revokeapikey) | **Delete** /apikey/{apiKeyName} | Revoke API key
+*BuildAPI* | [**ListBuilds**](docs/BuildAPI.md#listbuilds) | **Get** /build | List builds
 *ContainerRegistryAPI* | [**GetContainerRegistry**](docs/ContainerRegistryAPI.md#getcontainerregistry) | **Get** /container-registry/{server} | Get container registry credentials
 *ContainerRegistryAPI* | [**ListContainerRegistries**](docs/ContainerRegistryAPI.md#listcontainerregistries) | **Get** /container-registry | List container registries
 *ContainerRegistryAPI* | [**RemoveContainerRegistry**](docs/ContainerRegistryAPI.md#removecontainerregistry) | **Delete** /container-registry/{server} | Remove a container registry credentials
@@ -96,6 +97,11 @@ Class | Method | HTTP request | Description
 *GitProviderAPI* | [**ListGitProviders**](docs/GitProviderAPI.md#listgitproviders) | **Get** /gitprovider | List Git providers
 *GitProviderAPI* | [**RemoveGitProvider**](docs/GitProviderAPI.md#removegitprovider) | **Delete** /gitprovider/{gitProviderId} | Remove Git provider
 *GitProviderAPI* | [**SetGitProvider**](docs/GitProviderAPI.md#setgitprovider) | **Put** /gitprovider | Set Git provider
+*PrebuildAPI* | [**DeletePrebuild**](docs/PrebuildAPI.md#deleteprebuild) | **Delete** /project-config/prebuild/{projectConfigName}/{prebuildId} | Delete prebuild
+*PrebuildAPI* | [**GetPrebuild**](docs/PrebuildAPI.md#getprebuild) | **Get** /project-config/prebuild/{prebuildId} | Get prebuild
+*PrebuildAPI* | [**ListPrebuilds**](docs/PrebuildAPI.md#listprebuilds) | **Get** /project-config/prebuild | List prebuilds
+*PrebuildAPI* | [**ProcessGitEvent**](docs/PrebuildAPI.md#processgitevent) | **Post** /project-config/prebuild/process-git-event | ProcessGitEvent
+*PrebuildAPI* | [**SetPrebuild**](docs/PrebuildAPI.md#setprebuild) | **Put** /project-config/prebuild | Set prebuild
 *ProfileAPI* | [**DeleteProfileData**](docs/ProfileAPI.md#deleteprofiledata) | **Delete** /profile | Delete profile data
 *ProfileAPI* | [**GetProfileData**](docs/ProfileAPI.md#getprofiledata) | **Get** /profile | Get profile data
 *ProfileAPI* | [**SetProfileData**](docs/ProfileAPI.md#setprofiledata) | **Put** /profile | Set profile data
@@ -130,9 +136,15 @@ Class | Method | HTTP request | Description
 
  - [ApiKey](docs/ApiKey.md)
  - [ApikeyApiKeyType](docs/ApikeyApiKeyType.md)
+ - [Build](docs/Build.md)
+ - [BuildBuildState](docs/BuildBuildState.md)
+ - [BuildConfig](docs/BuildConfig.md)
+ - [CachedBuild](docs/CachedBuild.md)
  - [ContainerRegistry](docs/ContainerRegistry.md)
+ - [CreatePrebuildDTO](docs/CreatePrebuildDTO.md)
  - [CreateProjectConfigDTO](docs/CreateProjectConfigDTO.md)
- - [CreateProjectConfigSourceDTO](docs/CreateProjectConfigSourceDTO.md)
+ - [CreateProjectDTO](docs/CreateProjectDTO.md)
+ - [CreateProjectSourceDTO](docs/CreateProjectSourceDTO.md)
  - [CreateWorkspaceDTO](docs/CreateWorkspaceDTO.md)
  - [DevcontainerConfig](docs/DevcontainerConfig.md)
  - [FRPSConfig](docs/FRPSConfig.md)
@@ -146,9 +158,10 @@ Class | Method | HTTP request | Description
  - [GitUser](docs/GitUser.md)
  - [InstallProviderRequest](docs/InstallProviderRequest.md)
  - [NetworkKey](docs/NetworkKey.md)
+ - [PrebuildConfig](docs/PrebuildConfig.md)
+ - [PrebuildDTO](docs/PrebuildDTO.md)
  - [ProfileData](docs/ProfileData.md)
  - [Project](docs/Project.md)
- - [ProjectBuildConfig](docs/ProjectBuildConfig.md)
  - [ProjectConfig](docs/ProjectConfig.md)
  - [ProjectInfo](docs/ProjectInfo.md)
  - [ProjectState](docs/ProjectState.md)

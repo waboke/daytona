@@ -67,73 +67,76 @@ func (r *BuildRunner) Stop() {
 }
 
 func (r *BuildRunner) Run() {
-	pendingState := BuildStatePending
-	builds, err := r.buildStore.List(&BuildFilter{State: &pendingState})
+	builds, err := r.buildStore.List(nil)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
 	var wg sync.WaitGroup
-	for _, build := range builds {
-		wg.Add(1)
-		go r.RunBuildProcess(build, &wg)
+	for _, currentBuild := range builds {
+		if currentBuild.State == BuildStatePending {
+			wg.Add(1)
+			if currentBuild.BuildConfig != nil {
+				currentBuild.BuildConfig.CachedBuild = FetchCachedBuild(currentBuild, builds)
+			}
+			go r.RunBuildProcess(currentBuild, &wg)
+		}
 	}
 
 	wg.Wait()
-
 }
 
-func (r *BuildRunner) RunBuildProcess(build *Build, wg *sync.WaitGroup) {
+func (r *BuildRunner) RunBuildProcess(b *Build, wg *sync.WaitGroup) {
 	if wg != nil {
 		defer wg.Done()
 	}
 
-	if build.Project.BuildConfig == nil {
+	if b.BuildConfig == nil {
 		return
 	}
 
-	buildLogger := r.loggerFactory.CreateBuildLogger(build.Project.Name, build.Id, logs.LogSourceBuilder)
+	buildLogger := r.loggerFactory.CreateBuildLogger(b.Id, logs.LogSourceBuilder)
 	defer buildLogger.Close()
 
-	builder, err := r.builderFactory.Create(*build)
+	builder, err := r.builderFactory.Create(*b)
 	if err != nil {
-		r.handleBuildError(*build, builder, err, buildLogger)
+		r.handleBuildError(*b, builder, err, buildLogger)
 		return
 	}
 
-	build.State = BuildStateRunning
-	err = r.buildStore.Save(build)
+	b.State = BuildStateRunning
+	err = r.buildStore.Save(b)
 	if err != nil {
-		r.handleBuildError(*build, builder, err, buildLogger)
+		r.handleBuildError(*b, builder, err, buildLogger)
 		return
 	}
 
-	image, user, err := builder.Build(*build)
+	image, user, err := builder.Build(*b)
 	if err != nil {
-		r.handleBuildError(*build, builder, err, buildLogger)
+		r.handleBuildError(*b, builder, err, buildLogger)
 		return
 	}
 
-	build.Image = image
-	build.User = user
-	build.State = BuildStateSuccess
-	err = r.buildStore.Save(build)
+	b.Image = image
+	b.User = user
+	b.State = BuildStateSuccess
+	err = r.buildStore.Save(b)
 	if err != nil {
-		r.handleBuildError(*build, builder, err, buildLogger)
+		r.handleBuildError(*b, builder, err, buildLogger)
 		return
 	}
 
-	err = builder.Publish(*build)
+	err = builder.Publish(*b)
 	if err != nil {
-		r.handleBuildError(*build, builder, err, buildLogger)
+		r.handleBuildError(*b, builder, err, buildLogger)
 		return
 	}
 
-	build.State = BuildStatePublished
-	err = r.buildStore.Save(build)
+	b.State = BuildStatePublished
+	err = r.buildStore.Save(b)
 	if err != nil {
-		r.handleBuildError(*build, builder, err, buildLogger)
+		r.handleBuildError(*b, builder, err, buildLogger)
 		return
 	}
 
@@ -144,19 +147,18 @@ func (r *BuildRunner) RunBuildProcess(build *Build, wg *sync.WaitGroup) {
 	}
 
 	if r.telemetryEnabled {
-		r.logTelemetry(context.Background(), *build, err)
+		r.logTelemetry(context.Background(), *b, err)
 	}
-
 }
 
-func (r *BuildRunner) handleBuildError(build Build, builder IBuilder, err error, buildLogger logs.Logger) {
+func (r *BuildRunner) handleBuildError(b Build, builder IBuilder, err error, buildLogger logs.Logger) {
 	var errMsg string
 	errMsg += "################################################\n"
-	errMsg += fmt.Sprintf("#### BUILD FAILED FOR PROJECT %s: %s\n", build.Project.Name, err.Error())
+	errMsg += fmt.Sprintf("#### BUILD FAILED FOR %s: %s\n", b.Id, err.Error())
 	errMsg += "################################################\n"
 
-	build.State = BuildStateError
-	err = r.buildStore.Save(&build)
+	b.State = BuildStateError
+	err = r.buildStore.Save(&b)
 	if err != nil {
 		errMsg += fmt.Sprintf("Error saving build: %s\n", err.Error())
 	}
@@ -169,12 +171,12 @@ func (r *BuildRunner) handleBuildError(build Build, builder IBuilder, err error,
 	buildLogger.Write([]byte(errMsg + "\n"))
 
 	if r.telemetryEnabled {
-		r.logTelemetry(context.Background(), build, err)
+		r.logTelemetry(context.Background(), b, err)
 	}
 }
 
-func (r *BuildRunner) logTelemetry(ctx context.Context, build Build, err error) {
-	telemetryProps := telemetry.NewBuildRunnerEventProps(ctx, build.Id, string(build.State))
+func (r *BuildRunner) logTelemetry(ctx context.Context, b Build, err error) {
+	telemetryProps := telemetry.NewBuildRunnerEventProps(ctx, b.Id, string(b.State))
 	event := telemetry.BuildEventRunBuild
 	if err != nil {
 		telemetryProps["error"] = err.Error()

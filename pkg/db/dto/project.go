@@ -7,7 +7,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
-	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 )
 
 type RepositoryDTO struct {
@@ -131,7 +130,7 @@ func ToProjectStateDTO(state *project.ProjectState) *ProjectStateDTO {
 	}
 }
 
-func ToProjectBuildDTO(build *buildconfig.ProjectBuildConfig) *ProjectBuildDTO {
+func ToProjectBuildDTO(build *buildconfig.BuildConfig) *ProjectBuildDTO {
 	if build == nil {
 		return nil
 	}
@@ -149,13 +148,11 @@ func ToProjectBuildDTO(build *buildconfig.ProjectBuildConfig) *ProjectBuildDTO {
 
 func ToProject(projectDTO ProjectDTO) *project.Project {
 	return &project.Project{
-		ProjectConfig: config.ProjectConfig{
-			Name:        projectDTO.Name,
-			Image:       projectDTO.Image,
-			User:        projectDTO.User,
-			BuildConfig: ToProjectBuild(projectDTO.Build),
-			Repository:  ToRepository(projectDTO.Repository),
-		},
+		Name:        projectDTO.Name,
+		Image:       projectDTO.Image,
+		User:        projectDTO.User,
+		BuildConfig: ToProjectBuild(projectDTO.Build),
+		Repository:  ToRepository(projectDTO.Repository),
 		WorkspaceId: projectDTO.WorkspaceId,
 		Target:      projectDTO.Target,
 		State:       ToProjectState(projectDTO.State),
@@ -220,16 +217,16 @@ func ToRepository(repoDTO RepositoryDTO) *gitprovider.GitRepository {
 	return &repo
 }
 
-func ToProjectBuild(buildDTO *ProjectBuildDTO) *buildconfig.ProjectBuildConfig {
+func ToProjectBuild(buildDTO *ProjectBuildDTO) *buildconfig.BuildConfig {
 	if buildDTO == nil {
 		return nil
 	}
 
 	if buildDTO.Devcontainer == nil {
-		return &buildconfig.ProjectBuildConfig{}
+		return &buildconfig.BuildConfig{}
 	}
 
-	return &buildconfig.ProjectBuildConfig{
+	return &buildconfig.BuildConfig{
 		Devcontainer: &buildconfig.DevcontainerConfig{
 			FilePath: buildDTO.Devcontainer.DevContainerFilePath,
 		},

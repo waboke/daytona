@@ -34,11 +34,13 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/api/controllers/apikey"
 	"github.com/daytonaio/daytona/pkg/api/controllers/binary"
+	"github.com/daytonaio/daytona/pkg/api/controllers/build"
 	"github.com/daytonaio/daytona/pkg/api/controllers/containerregistry"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
 	"github.com/daytonaio/daytona/pkg/api/controllers/profiledata"
 	"github.com/daytonaio/daytona/pkg/api/controllers/projectconfig"
+	"github.com/daytonaio/daytona/pkg/api/controllers/projectconfig/prebuild"
 	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
 	"github.com/daytonaio/daytona/pkg/api/controllers/target"
@@ -48,6 +50,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/daytonaio/daytona/internal/constants"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -56,8 +59,6 @@ type ApiServerConfig struct {
 	ApiPort          int
 	TelemetryService telemetry.TelemetryService
 }
-
-const HEALTH_CHECK_ROUTE = "/health"
 
 func NewApiServer(config ApiServerConfig) *ApiServer {
 	return &ApiServer{
@@ -103,7 +104,7 @@ func (a *ApiServer) Start() error {
 
 	public := a.router.Group("/")
 	public.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	public.GET(HEALTH_CHECK_ROUTE, func(c *gin.Context) {
+	public.GET(constants.HEALTH_CHECK_ROUTE, func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
@@ -137,6 +138,15 @@ func (a *ApiServer) Start() error {
 
 	projectConfigController := protected.Group("/project-config")
 	{
+		// Defining the prebuild routes first to avoid conflicts with the project config routes
+		projectConfigPrebuildsGroup := projectConfigController.Group("/prebuild")
+		{
+			projectConfigPrebuildsGroup.GET("/:prebuildId", prebuild.GetPrebuild)
+			projectConfigPrebuildsGroup.GET("/", prebuild.ListPrebuilds)
+			projectConfigPrebuildsGroup.PUT("/", prebuild.SetPrebuild)
+			projectConfigPrebuildsGroup.DELETE("/:projectConfigName/:prebuildId", prebuild.DeletePrebuild)
+		}
+
 		projectConfigController.GET("/:configName", projectconfig.GetProjectConfig)
 		projectConfigController.GET("/", projectconfig.ListProjectConfigs)
 		projectConfigController.PUT("/", projectconfig.SetProjectConfig)
@@ -144,6 +154,8 @@ func (a *ApiServer) Start() error {
 		projectConfigController.PATCH("/:configName/set-default", projectconfig.SetDefaultProjectConfig)
 		projectConfigController.DELETE("/:configName", projectconfig.DeleteProjectConfig)
 	}
+
+	public.POST(constants.WEBHOOK_EVENT_ROUTE, prebuild.ProcessGitEvent)
 
 	providerController := protected.Group("/provider")
 	{
@@ -159,6 +171,11 @@ func (a *ApiServer) Start() error {
 		containerRegistryController.GET("/:server", containerregistry.GetContainerRegistry)
 		containerRegistryController.PUT("/:server", containerregistry.SetContainerRegistry)
 		containerRegistryController.DELETE("/:server", containerregistry.RemoveContainerRegistry)
+	}
+
+	buildController := protected.Group("/build")
+	{
+		buildController.GET("/", build.ListBuilds)
 	}
 
 	targetController := protected.Group("/target")
@@ -226,7 +243,7 @@ func (a *ApiServer) Start() error {
 }
 
 func (a *ApiServer) HealthCheck() error {
-	resp, err := http.Get(fmt.Sprintf("http://localhost:%d%s", a.apiPort, HEALTH_CHECK_ROUTE))
+	resp, err := http.Get(fmt.Sprintf("http://localhost:%d%s", a.apiPort, constants.HEALTH_CHECK_ROUTE))
 	if err != nil {
 		return err
 	}

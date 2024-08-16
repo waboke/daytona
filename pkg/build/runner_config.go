@@ -9,10 +9,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/google/uuid"
 )
 
-const DEFAULT_POLLER_INTERVAL = "0 */5 * * * *"
+// 10 second interval
+const DEFAULT_POLLER_INTERVAL = "*/10 * * * * *"
 
 type Config struct {
 	Id               string `json:"id" validate:"required"`
@@ -93,12 +95,12 @@ func Save(c Config) error {
 }
 
 func GetConfigDir() (string, error) {
-	userConfigDir, err := os.UserConfigDir()
+	configDir, err := config.GetConfigDir()
 	if err != nil {
 		return "", err
 	}
 
-	return filepath.Join(userConfigDir, "daytona", "build-poller"), nil
+	return filepath.Join(configDir, "build-poller"), nil
 }
 
 func getDefaultConfig() *Config {

@@ -65,7 +65,7 @@ func (s *InMemoryProjectConfigStore) processFilters(filter *config.Filter) ([]*c
 		}
 		if filter.Url != nil {
 			for _, projectConfig := range filteredProjectConfigs {
-				if projectConfig.Repository.Url != *filter.Url {
+				if projectConfig.RepositoryUrl != *filter.Url {
 					delete(filteredProjectConfigs, projectConfig.Name)
 				}
 			}

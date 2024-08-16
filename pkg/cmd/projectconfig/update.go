@@ -23,7 +23,7 @@ var projectConfigUpdateCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var projectConfig *apiclient.ProjectConfig
-		var projectConfigs []apiclient.CreateProjectConfigDTO
+		var projectDtos []apiclient.CreateProjectDTO
 		var res *http.Response
 		ctx := context.Background()
 
@@ -53,10 +53,12 @@ var projectConfigUpdateCmd = &cobra.Command{
 			return
 		}
 
-		projectConfigs = append(projectConfigs, apiclient.CreateProjectConfigDTO{
+		projectDtos = append(projectDtos, apiclient.CreateProjectDTO{
 			Name: projectConfig.Name,
-			Source: apiclient.CreateProjectConfigSourceDTO{
-				Repository: projectConfig.Repository,
+			Source: apiclient.CreateProjectSourceDTO{
+				Repository: apiclient.GitRepository{
+					Url: projectConfig.RepositoryUrl,
+				},
 			},
 			BuildConfig: projectConfig.BuildConfig,
 			EnvVars:     projectConfig.EnvVars,
@@ -72,22 +74,20 @@ var projectConfigUpdateCmd = &cobra.Command{
 			projectDefaults.DevcontainerFilePath = projectConfig.BuildConfig.Devcontainer.FilePath
 		}
 
-		create.ProjectsConfigurationChanged, err = create.RunProjectConfiguration(&projectConfigs, *projectDefaults)
+		create.ProjectsConfigurationChanged, err = create.RunProjectConfiguration(&projectDtos, *projectDefaults)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		newProjectConfig := apiclient.CreateProjectConfigDTO{
-			Name:        projectConfig.Name,
-			BuildConfig: projectConfigs[0].BuildConfig,
-			Image:       projectConfigs[0].Image,
-			User:        projectConfigs[0].User,
-			Source: apiclient.CreateProjectConfigSourceDTO{
-				Repository: projectConfigs[0].Source.Repository,
-			},
+			Name:          projectConfig.Name,
+			BuildConfig:   projectDtos[0].BuildConfig,
+			Image:         projectDtos[0].Image,
+			User:          projectDtos[0].User,
+			RepositoryUrl: projectDtos[0].Source.Repository.Url,
 		}
 
-		newProjectConfig.EnvVars = *workspace_util.GetEnvVariables(&projectConfigs[0], nil)
+		newProjectConfig.EnvVars = *workspace_util.GetEnvVariables(projectDtos[0].EnvVars, nil)
 
 		res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
 		if err != nil {

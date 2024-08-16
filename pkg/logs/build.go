@@ -13,17 +13,16 @@ import (
 )
 
 type buildLogger struct {
-	logsDir     string
-	buildId     string
-	projectName string
-	logFile     *os.File
-	logger      *logrus.Logger
-	source      LogSource
+	logsDir string
+	buildId string
+	logFile *os.File
+	logger  *logrus.Logger
+	source  LogSource
 }
 
 func (bl *buildLogger) Write(p []byte) (n int, err error) {
 	if bl.logFile == nil {
-		filePath := filepath.Join(bl.logsDir, bl.projectName, bl.buildId, "log")
+		filePath := filepath.Join(bl.logsDir, "builds", bl.buildId, "log")
 		err = os.MkdirAll(filepath.Dir(filePath), 0755)
 		if err != nil {
 			return len(p), err
@@ -40,7 +39,7 @@ func (bl *buildLogger) Write(p []byte) (n int, err error) {
 	var entry LogEntry
 	entry.Msg = string(p)
 	entry.Source = string(bl.source)
-	entry.ProjectName = bl.projectName
+	entry.ProjectName = bl.buildId
 
 	b, err := json.Marshal(entry)
 	if err != nil {
@@ -67,7 +66,7 @@ func (bl *buildLogger) Close() error {
 }
 
 func (bl *buildLogger) Cleanup() error {
-	projectLogsDir := filepath.Join(bl.logsDir, bl.projectName, bl.buildId)
+	projectLogsDir := filepath.Join(bl.logsDir, "builds", bl.buildId)
 
 	_, err := os.Stat(projectLogsDir)
 	if os.IsNotExist(err) {
@@ -79,19 +78,18 @@ func (bl *buildLogger) Cleanup() error {
 	return os.RemoveAll(projectLogsDir)
 }
 
-func (l *loggerFactoryImpl) CreateBuildLogger(projectName, buildId string, source LogSource) Logger {
+func (l *loggerFactoryImpl) CreateBuildLogger(buildId string, source LogSource) Logger {
 	logger := logrus.New()
 
 	return &buildLogger{
-		logsDir:     l.logsDir,
-		buildId:     buildId,
-		projectName: projectName,
-		logger:      logger,
-		source:      source,
+		logsDir: l.logsDir,
+		buildId: buildId,
+		logger:  logger,
+		source:  source,
 	}
 }
 
-func (l *loggerFactoryImpl) CreateBuildLogReader(projectName, buildId string) (io.Reader, error) {
-	filePath := filepath.Join(l.logsDir, projectName, buildId, "log")
+func (l *loggerFactoryImpl) CreateBuildLogReader(buildId string) (io.Reader, error) {
+	filePath := filepath.Join(l.logsDir, "builds", buildId, "log")
 	return os.Open(filePath)
 }

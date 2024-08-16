@@ -8,7 +8,6 @@ import (
 
 	projectconfig_internal "github.com/daytonaio/daytona/internal/testing/server/projectconfig"
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 	"github.com/stretchr/testify/suite"
@@ -18,44 +17,36 @@ var projectConfig1Image = "image1"
 var projectConfig1User = "user1"
 
 var projectConfig1 *config.ProjectConfig = &config.ProjectConfig{
-	Name:        "pc1",
-	Image:       projectConfig1Image,
-	User:        projectConfig1User,
-	BuildConfig: nil,
-	Repository: &gitprovider.GitRepository{
-		Url: "url1",
-	},
-	IsDefault: true,
+	Name:          "pc1",
+	Image:         projectConfig1Image,
+	User:          projectConfig1User,
+	BuildConfig:   nil,
+	RepositoryUrl: "url1",
+	IsDefault:     true,
 }
 
 var projectConfig2 *config.ProjectConfig = &config.ProjectConfig{
-	Name:        "pc2",
-	Image:       "image2",
-	User:        "user2",
-	BuildConfig: nil,
-	Repository: &gitprovider.GitRepository{
-		Url: "url1",
-	},
+	Name:          "pc2",
+	Image:         "image2",
+	User:          "user2",
+	BuildConfig:   nil,
+	RepositoryUrl: "url1",
 }
 
 var projectConfig3 *config.ProjectConfig = &config.ProjectConfig{
-	Name:        "pc3",
-	Image:       "image3",
-	User:        "user3",
-	BuildConfig: nil,
-	Repository: &gitprovider.GitRepository{
-		Url: "url3",
-	},
+	Name:          "pc3",
+	Image:         "image3",
+	User:          "user3",
+	BuildConfig:   nil,
+	RepositoryUrl: "url3",
 }
 
 var projectConfig4 *config.ProjectConfig = &config.ProjectConfig{
-	Name:        "pc4",
-	Image:       "image4",
-	User:        "user4",
-	BuildConfig: nil,
-	Repository: &gitprovider.GitRepository{
-		Url: "url4",
-	},
+	Name:          "pc4",
+	Image:         "image4",
+	User:          "user4",
+	BuildConfig:   nil,
+	RepositoryUrl: "url4",
 }
 
 var expectedProjectConfigs []*config.ProjectConfig
@@ -95,7 +86,7 @@ func (s *ProjectConfigServiceTestSuite) SetupTest() {
 	}
 
 	s.projectConfigStore = projectconfig_internal.NewInMemoryProjectConfigStore()
-	s.projectConfigService = projectconfig.NewConfigService(projectconfig.ProjectConfigServiceConfig{
+	s.projectConfigService = projectconfig.NewProjectConfigService(projectconfig.ProjectConfigServiceConfig{
 		ConfigStore: s.projectConfigStore,
 	})
 

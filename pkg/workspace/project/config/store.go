@@ -11,6 +11,14 @@ type Filter struct {
 	Default *bool
 }
 
+type PrebuildFilter struct {
+	ProjectConfigName *string
+	Id                *string
+	Branch            *string
+	CommitInterval    *int
+	TriggerFiles      *[]string
+}
+
 type Store interface {
 	List(filter *Filter) ([]*ProjectConfig, error)
 	Find(filter *Filter) (*ProjectConfig, error)
@@ -20,8 +28,13 @@ type Store interface {
 
 var (
 	ErrProjectConfigNotFound = errors.New("project config not found")
+	ErrPrebuildNotFound      = errors.New("prebuild not found")
 )
 
 func IsProjectConfigNotFound(err error) bool {
 	return err.Error() == ErrProjectConfigNotFound.Error()
+}
+
+func IsPrebuildNotFound(err error) bool {
+	return err.Error() == ErrPrebuildNotFound.Error()
 }

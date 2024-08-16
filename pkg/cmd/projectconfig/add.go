@@ -22,7 +22,7 @@ var projectConfigAddCmd = &cobra.Command{
 	Short:   "Add a project config",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		var projects []apiclient.CreateProjectConfigDTO
+		var projects []apiclient.CreateProjectDTO
 		var existingProjectConfigNames []string
 		ctx := context.Background()
 
@@ -105,16 +105,14 @@ var projectConfigAddCmd = &cobra.Command{
 		}
 
 		newProjectConfig := apiclient.CreateProjectConfigDTO{
-			Name:        chosenName,
-			BuildConfig: projects[0].BuildConfig,
-			Image:       projects[0].Image,
-			User:        projects[0].User,
-			Source: apiclient.CreateProjectConfigSourceDTO{
-				Repository: projects[0].Source.Repository,
-			},
+			Name:          chosenName,
+			BuildConfig:   projects[0].BuildConfig,
+			Image:         projects[0].Image,
+			User:          projects[0].User,
+			RepositoryUrl: projects[0].Source.Repository.Url,
 		}
 
-		newProjectConfig.EnvVars = *workspace_util.GetEnvVariables(&projects[0], nil)
+		newProjectConfig.EnvVars = *workspace_util.GetEnvVariables(projects[0].EnvVars, nil)
 
 		res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
 		if err != nil {

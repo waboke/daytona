@@ -25,12 +25,13 @@ func NewBuildStore(db *gorm.DB) (*BuildStore, error) {
 	return &BuildStore{db: db}, nil
 }
 
-func (b *BuildStore) Find(hash string) (*build.Build, error) {
+func (b *BuildStore) Find(filter *build.Filter) (*build.Build, error) {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
 	buildDTO := BuildDTO{}
-	tx := b.db.Where("hash = ?", hash).First(&buildDTO)
+	tx := processBuildFilters(b.db, filter).First(&buildDTO)
+
 	if tx.Error != nil {
 		if tx.Error == gorm.ErrRecordNotFound {
 			return nil, build.ErrBuildNotFound
@@ -43,19 +44,12 @@ func (b *BuildStore) Find(hash string) (*build.Build, error) {
 	return build, nil
 }
 
-func (b *BuildStore) List(filter *build.BuildFilter) ([]*build.Build, error) {
+func (b *BuildStore) List(filter *build.Filter) ([]*build.Build, error) {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
 	buildDTOs := []BuildDTO{}
-	tx := b.db
-
-	if filter != nil {
-		if filter.State != nil {
-			tx = b.db.Where("state = ?", *filter.State)
-		}
-	}
-	tx = tx.Find(&buildDTOs)
+	tx := processBuildFilters(b.db, filter).Find(&buildDTOs)
 
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -82,11 +76,11 @@ func (b *BuildStore) Save(build *build.Build) error {
 	return nil
 }
 
-func (b *BuildStore) Delete(hash string) error {
+func (b *BuildStore) Delete(id string) error {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
-	tx := b.db.Where("hash = ?", hash).Delete(&BuildDTO{})
+	tx := b.db.Where("id = ?", id).Delete(&BuildDTO{})
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -95,4 +89,25 @@ func (b *BuildStore) Delete(hash string) error {
 	}
 
 	return nil
+}
+
+func processBuildFilters(tx *gorm.DB, filter *build.Filter) *gorm.DB {
+	if filter != nil {
+		if filter.Id != nil {
+			tx = tx.Where("id = ?", *filter.Id)
+		}
+		if filter.Hash != nil {
+			tx = tx.Where("hash = ?", *filter.Hash)
+		}
+		if filter.States != nil {
+			tx = tx.Where("state IN ?", filter.States)
+		}
+		if filter.PrebuildIds != nil {
+			tx = tx.Where("prebuild_id IN ?", filter.PrebuildIds)
+		}
+		if filter.GetNewest != nil && *filter.GetNewest {
+			tx = tx.Order("created_at desc").Limit(1)
+		}
+	}
+	return tx
 }

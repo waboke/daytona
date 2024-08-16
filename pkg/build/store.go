@@ -7,15 +7,19 @@ import (
 	"errors"
 )
 
-type BuildFilter struct {
-	State *BuildState
+type Filter struct {
+	Id          *string
+	Hash        *string
+	States      []*BuildState
+	PrebuildIds *[]string
+	GetNewest   *bool
 }
 
 type Store interface {
-	Find(hash string) (*Build, error)
-	List(filter *BuildFilter) ([]*Build, error)
+	Find(filter *Filter) (*Build, error)
+	List(filter *Filter) ([]*Build, error)
 	Save(build *Build) error
-	Delete(hash string) error
+	Delete(id string) error
 }
 
 var (

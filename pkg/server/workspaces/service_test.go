@@ -18,7 +18,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider"
-	projectconfig_dto "github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/workspace"
@@ -45,10 +44,10 @@ var createWorkspaceDto = dto.CreateWorkspaceDTO{
 	Name:   "test",
 	Id:     "test",
 	Target: target.Name,
-	Projects: []projectconfig_dto.CreateProjectConfigDTO{
+	Projects: []dto.CreateProjectDTO{
 		{
 			Name: "project1",
-			Source: projectconfig_dto.CreateProjectConfigSourceDTO{
+			Source: dto.CreateProjectSourceDTO{
 				Repository: &gitprovider.GitRepository{
 					Id:   "123",
 					Url:  "https://github.com/daytonaio/daytona",

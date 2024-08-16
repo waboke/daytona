@@ -6,6 +6,8 @@
 package mocks
 
 import (
+	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/server/projectconfig/dto"
 	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 	"github.com/stretchr/testify/mock"
 )
@@ -40,5 +42,30 @@ func (m *mockProjectConfigService) SetDefault(name string) error {
 
 func (m *mockProjectConfigService) Save(pc *config.ProjectConfig) error {
 	args := m.Called(pc)
+	return args.Error(0)
+}
+
+func (m *mockProjectConfigService) SetPrebuild(createProjectDto dto.CreatePrebuildDTO) (*dto.PrebuildDTO, error) {
+	args := m.Called(createProjectDto)
+	return args.Get(0).(*dto.PrebuildDTO), args.Error(1)
+}
+
+func (m *mockProjectConfigService) FindPrebuild(projectConfigFilter *config.Filter, prebuildFilter *config.PrebuildFilter) (*dto.PrebuildDTO, error) {
+	args := m.Called(projectConfigFilter, prebuildFilter)
+	return args.Get(0).(*dto.PrebuildDTO), args.Error(1)
+}
+
+func (m *mockProjectConfigService) ListPrebuilds(projectConfigFilter *config.Filter, prebuildFilter *config.PrebuildFilter) ([]*dto.PrebuildDTO, error) {
+	args := m.Called(projectConfigFilter, prebuildFilter)
+	return args.Get(0).([]*dto.PrebuildDTO), args.Error(1)
+}
+
+func (m *mockProjectConfigService) DeletePrebuild(projectConfigName string, id string) error {
+	args := m.Called(projectConfigName, id)
+	return args.Error(0)
+}
+
+func (m *mockProjectConfigService) ProcessGitEvent(data gitprovider.GitEventData) error {
+	args := m.Called(data)
 	return args.Error(0)
 }
