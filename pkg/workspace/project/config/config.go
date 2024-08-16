@@ -4,9 +4,6 @@
 package config
 
 import (
-	"encoding/json"
-	"sort"
-
 	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 )
 
@@ -43,9 +40,8 @@ func (pc *ProjectConfig) SetPrebuild(p *PrebuildConfig) error {
 
 func (pc *ProjectConfig) FindPrebuild(filter *PrebuildFilter) (*PrebuildConfig, error) {
 	for _, pb := range pc.Prebuilds {
-		filteredPrebuild := filterPrebuild(pb, filter)
-		if filteredPrebuild != nil {
-			return filteredPrebuild, nil
+		if pb.Match(filter) {
+			return pb, nil
 		}
 	}
 
@@ -60,9 +56,8 @@ func (pc *ProjectConfig) ListPrebuilds(filter *PrebuildFilter) ([]*PrebuildConfi
 	prebuilds := []*PrebuildConfig{}
 
 	for _, pb := range pc.Prebuilds {
-		filteredPrebuild := filterPrebuild(pb, filter)
-		if filteredPrebuild != nil {
-			prebuilds = append(prebuilds, filteredPrebuild)
+		if pb.Match(filter) {
+			prebuilds = append(prebuilds, pb)
 		}
 	}
 
@@ -80,37 +75,4 @@ func (pc *ProjectConfig) RemovePrebuild(id string) error {
 
 	pc.Prebuilds = newPrebuilds
 	return nil
-}
-
-func filterPrebuild(pb *PrebuildConfig, filter *PrebuildFilter) *PrebuildConfig {
-	if filter.Id != nil && *filter.Id != pb.Id {
-		return nil
-	}
-
-	if filter.Branch != nil && *filter.Branch != pb.Branch {
-		return nil
-	}
-
-	if filter.CommitInterval != nil && *filter.CommitInterval != pb.CommitInterval {
-		return nil
-	}
-
-	if filter.TriggerFiles != nil {
-		// Sort the trigger files before checking if same
-		sort.Strings(pb.TriggerFiles)
-		sort.Strings(*filter.TriggerFiles)
-		triggerFilesJson, err := json.Marshal(pb.TriggerFiles)
-		if err != nil {
-			return nil
-		}
-		filterFilesJson, err := json.Marshal(*filter.TriggerFiles)
-		if err != nil {
-			return nil
-		}
-		if string(triggerFilesJson) != string(filterFilesJson) {
-			return nil
-		}
-	}
-
-	return pb
 }

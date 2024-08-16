@@ -6,7 +6,6 @@ package prebuild
 import (
 	"context"
 	"log"
-	"net/http"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -45,20 +44,15 @@ var prebuildDeleteCmd = &cobra.Command{
 			selectedPrebuild = selection.GetPrebuildFromPrompt(prebuilds, "Delete")
 			selectedPrebuildId = selectedPrebuild.Id
 		} else {
-			var res *http.Response
-
-			selectedPrebuild, res, err = apiClient.PrebuildAPI.GetPrebuild(context.Background(), args[0]).Execute()
-			if err != nil {
-				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
-			}
+			selectedPrebuildId = args[0]
 		}
 
-		res, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), selectedPrebuild.ProjectConfigName, selectedPrebuildId).Force(forceFlag).Execute()
+		res, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), selectedPrebuildId).Force(forceFlag).Execute()
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		views.RenderInfoMessage("Project config deleted successfully")
+		views.RenderInfoMessage("Prebuild deleted successfully")
 	},
 }
 

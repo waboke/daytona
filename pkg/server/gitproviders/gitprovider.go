@@ -119,7 +119,7 @@ func (s *GitProviderService) GetConfigForUrl(repoUrl string) (*gitprovider.GitPr
 }
 
 func (s *GitProviderService) GetGitProviderForHttpRequest(req *http.Request) (gitprovider.GitProvider, error) {
-	var providerId string
+	var provider *gitprovider.GitProviderConfig
 
 	gitProviders, err := s.configStore.List()
 	if err != nil {
@@ -131,17 +131,16 @@ func (s *GitProviderService) GetGitProviderForHttpRequest(req *http.Request) (gi
 		if header == "" {
 			continue
 		} else {
-			providerId = p.Id
+			provider = p
 			break
 		}
 	}
 
-	return s.newGitProvider(&gitprovider.GitProviderConfig{
-		Id:         providerId,
-		Username:   "",
-		Token:      "",
-		BaseApiUrl: nil,
-	})
+	if provider == nil {
+		return nil, errors.New("git provider for HTTP request not found")
+	}
+
+	return s.newGitProvider(provider)
 }
 
 func (s *GitProviderService) SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error {

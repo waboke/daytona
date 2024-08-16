@@ -141,10 +141,10 @@ func (a *ApiServer) Start() error {
 		// Defining the prebuild routes first to avoid conflicts with the project config routes
 		projectConfigPrebuildsGroup := projectConfigController.Group("/prebuild")
 		{
-			projectConfigPrebuildsGroup.GET("/:prebuildId", prebuild.GetPrebuild)
-			projectConfigPrebuildsGroup.GET("/", prebuild.ListPrebuilds)
+			projectConfigPrebuildsGroup.GET("/single/:prebuildId", prebuild.GetPrebuild)
+			projectConfigPrebuildsGroup.GET("/:configName", prebuild.ListPrebuilds)
 			projectConfigPrebuildsGroup.PUT("/", prebuild.SetPrebuild)
-			projectConfigPrebuildsGroup.DELETE("/:projectConfigName/:prebuildId", prebuild.DeletePrebuild)
+			projectConfigPrebuildsGroup.DELETE("/:prebuildId", prebuild.DeletePrebuild)
 		}
 
 		projectConfigController.GET("/:configName", projectconfig.GetProjectConfig)

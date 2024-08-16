@@ -41,7 +41,7 @@ func (pl *projectLogger) Write(p []byte) (n int, err error) {
 	entry.Msg = string(p)
 	entry.Source = string(pl.source)
 	entry.WorkspaceId = pl.workspaceId
-	entry.ProjectName = pl.projectName
+	entry.ProjectId = pl.projectName
 
 	b, err := json.Marshal(entry)
 	if err != nil {

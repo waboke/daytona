@@ -6,6 +6,12 @@ Delete a prebuild configuration
 daytona prebuild delete [flags]
 ```
 
+### Options
+
+```
+  -f, --force   Force delete prebuild
+```
+
 ### Options inherited from parent commands
 
 ```

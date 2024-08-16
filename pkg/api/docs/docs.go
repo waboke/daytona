@@ -762,37 +762,6 @@ const docTemplate = `{
             }
         },
         "/project-config/prebuild": {
-            "get": {
-                "description": "List prebuilds",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "prebuild"
-                ],
-                "summary": "List prebuilds",
-                "operationId": "ListPrebuilds",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Config name",
-                        "name": "configName",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/PrebuildDTO"
-                            }
-                        }
-                    }
-                }
-            },
             "put": {
                 "description": "Set prebuild",
                 "consumes": [
@@ -847,7 +816,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/project-config/prebuild/{prebuildId}": {
+        "/project-config/prebuild/single/{prebuildId}": {
             "get": {
                 "description": "Get prebuild",
                 "consumes": [
@@ -877,7 +846,40 @@ const docTemplate = `{
                 }
             }
         },
-        "/project-config/prebuild/{projectConfigName}/{prebuildId}": {
+        "/project-config/prebuild/{configName}": {
+            "get": {
+                "description": "List prebuilds",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "List prebuilds",
+                "operationId": "ListPrebuilds",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config name",
+                        "name": "configName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/PrebuildDTO"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/project-config/prebuild/{prebuildId}": {
             "delete": {
                 "description": "Delete prebuild",
                 "consumes": [
@@ -889,13 +891,6 @@ const docTemplate = `{
                 "summary": "Delete prebuild",
                 "operationId": "DeletePrebuild",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Project config name",
-                        "name": "projectConfigName",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "Prebuild ID",

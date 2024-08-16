@@ -1303,6 +1303,25 @@ paths:
       tags:
       - project-config
   /project-config/prebuild:
+    put:
+      consumes:
+      - application/json
+      description: Set prebuild
+      operationId: SetPrebuild
+      parameters:
+      - description: Prebuild
+        in: body
+        name: prebuild
+        required: true
+        schema:
+          $ref: '#/definitions/CreatePrebuildDTO'
+      responses:
+        "201":
+          description: Created
+      summary: Set prebuild
+      tags:
+      - prebuild
+  /project-config/prebuild/{configName}:
     get:
       consumes:
       - application/json
@@ -1324,56 +1343,13 @@ paths:
       summary: List prebuilds
       tags:
       - prebuild
-    put:
-      consumes:
-      - application/json
-      description: Set prebuild
-      operationId: SetPrebuild
-      parameters:
-      - description: Prebuild
-        in: body
-        name: prebuild
-        required: true
-        schema:
-          $ref: '#/definitions/CreatePrebuildDTO'
-      responses:
-        "201":
-          description: Created
-      summary: Set prebuild
-      tags:
-      - prebuild
   /project-config/prebuild/{prebuildId}:
-    get:
-      consumes:
-      - application/json
-      description: Get prebuild
-      operationId: GetPrebuild
-      parameters:
-      - description: Prebuild ID
-        in: path
-        name: prebuildId
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/PrebuildDTO'
-      summary: Get prebuild
-      tags:
-      - prebuild
-  /project-config/prebuild/{projectConfigName}/{prebuildId}:
     delete:
       consumes:
       - application/json
       description: Delete prebuild
       operationId: DeletePrebuild
       parameters:
-      - description: Project config name
-        in: path
-        name: projectConfigName
-        required: true
-        type: string
       - description: Prebuild ID
         in: path
         name: prebuildId
@@ -1404,6 +1380,26 @@ paths:
         "200":
           description: OK
       summary: ProcessGitEvent
+      tags:
+      - prebuild
+  /project-config/prebuild/single/{prebuildId}:
+    get:
+      consumes:
+      - application/json
+      description: Get prebuild
+      operationId: GetPrebuild
+      parameters:
+      - description: Prebuild ID
+        in: path
+        name: prebuildId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/PrebuildDTO'
+      summary: Get prebuild
       tags:
       - prebuild
   /provider:

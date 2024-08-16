@@ -97,9 +97,9 @@ Class | Method | HTTP request | Description
 *GitProviderAPI* | [**ListGitProviders**](docs/GitProviderAPI.md#listgitproviders) | **Get** /gitprovider | List Git providers
 *GitProviderAPI* | [**RemoveGitProvider**](docs/GitProviderAPI.md#removegitprovider) | **Delete** /gitprovider/{gitProviderId} | Remove Git provider
 *GitProviderAPI* | [**SetGitProvider**](docs/GitProviderAPI.md#setgitprovider) | **Put** /gitprovider | Set Git provider
-*PrebuildAPI* | [**DeletePrebuild**](docs/PrebuildAPI.md#deleteprebuild) | **Delete** /project-config/prebuild/{projectConfigName}/{prebuildId} | Delete prebuild
-*PrebuildAPI* | [**GetPrebuild**](docs/PrebuildAPI.md#getprebuild) | **Get** /project-config/prebuild/{prebuildId} | Get prebuild
-*PrebuildAPI* | [**ListPrebuilds**](docs/PrebuildAPI.md#listprebuilds) | **Get** /project-config/prebuild | List prebuilds
+*PrebuildAPI* | [**DeletePrebuild**](docs/PrebuildAPI.md#deleteprebuild) | **Delete** /project-config/prebuild/{prebuildId} | Delete prebuild
+*PrebuildAPI* | [**GetPrebuild**](docs/PrebuildAPI.md#getprebuild) | **Get** /project-config/prebuild/single/{prebuildId} | Get prebuild
+*PrebuildAPI* | [**ListPrebuilds**](docs/PrebuildAPI.md#listprebuilds) | **Get** /project-config/prebuild/{configName} | List prebuilds
 *PrebuildAPI* | [**ProcessGitEvent**](docs/PrebuildAPI.md#processgitevent) | **Post** /project-config/prebuild/process-git-event | ProcessGitEvent
 *PrebuildAPI* | [**SetPrebuild**](docs/PrebuildAPI.md#setprebuild) | **Put** /project-config/prebuild | Set prebuild
 *ProfileAPI* | [**DeleteProfileData**](docs/ProfileAPI.md#deleteprofiledata) | **Delete** /profile | Delete profile data

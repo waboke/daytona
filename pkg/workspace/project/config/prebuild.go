@@ -4,6 +4,9 @@
 package config
 
 import (
+	"encoding/json"
+	"sort"
+
 	"github.com/docker/docker/pkg/stringid"
 )
 
@@ -21,4 +24,37 @@ func (p *PrebuildConfig) GenerateId() error {
 
 	p.Id = id
 	return nil
+}
+
+func (p *PrebuildConfig) Match(filter *PrebuildFilter) bool {
+	if filter.Id != nil && *filter.Id != p.Id {
+		return false
+	}
+
+	if filter.Branch != nil && *filter.Branch != p.Branch {
+		return false
+	}
+
+	if filter.CommitInterval != nil && *filter.CommitInterval != p.CommitInterval {
+		return false
+	}
+
+	if filter.TriggerFiles != nil {
+		// Sort the trigger files before checking if same
+		sort.Strings(p.TriggerFiles)
+		sort.Strings(*filter.TriggerFiles)
+		triggerFilesJson, err := json.Marshal(p.TriggerFiles)
+		if err != nil {
+			return false
+		}
+		filterFilesJson, err := json.Marshal(*filter.TriggerFiles)
+		if err != nil {
+			return false
+		}
+		if string(triggerFilesJson) != string(filterFilesJson) {
+			return false
+		}
+	}
+
+	return true
 }

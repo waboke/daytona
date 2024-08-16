@@ -86,12 +86,12 @@ func GetDocsLinkFromGitProvider(providerId string) string {
 	}
 }
 
-func GetScopesFromGitProvider(providerId string) string {
+func GetRequiredScopesFromGitProviderId(providerId string) string {
 	switch providerId {
 	case "github":
 		fallthrough
 	case "github-enterprise-server":
-		return "repo,read:user,user:email\noptional: admin:hooks"
+		return "repo,read:user,user:email"
 	case "gitlab":
 		fallthrough
 	case "gitlab-self-managed":
@@ -110,6 +110,17 @@ func GetScopesFromGitProvider(providerId string) string {
 		return "Code (Status, Read & Write); User Profile (Read); Project and Team (Read)"
 	case "aws-codecommit":
 		return "/"
+	default:
+		return ""
+	}
+}
+
+func GetPrebuildScopesFromGitProviderId(providerId string) string {
+	switch providerId {
+	case "github":
+		fallthrough
+	case "github-enterprise-server":
+		return "admin:hooks"
 	default:
 		return ""
 	}

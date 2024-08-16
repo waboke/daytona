@@ -119,8 +119,8 @@ var CreateCmd = &cobra.Command{
 
 		if existingProjectConfigName != nil {
 			logs_view.DisplayLogEntry(logs.LogEntry{
-				ProjectName: *existingProjectConfigName,
-				Msg:         fmt.Sprintf("Using detected project config '%s'\n", *existingProjectConfigName),
+				ProjectId: *existingProjectConfigName,
+				Msg:       fmt.Sprintf("Using detected project config '%s'\n", *existingProjectConfigName),
 			}, logs_view.FIRST_PROJECT_INDEX)
 		}
 

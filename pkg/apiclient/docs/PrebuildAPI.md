@@ -4,9 +4,9 @@ All URIs are relative to *http://localhost:3986*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**DeletePrebuild**](PrebuildAPI.md#DeletePrebuild) | **Delete** /project-config/prebuild/{projectConfigName}/{prebuildId} | Delete prebuild
-[**GetPrebuild**](PrebuildAPI.md#GetPrebuild) | **Get** /project-config/prebuild/{prebuildId} | Get prebuild
-[**ListPrebuilds**](PrebuildAPI.md#ListPrebuilds) | **Get** /project-config/prebuild | List prebuilds
+[**DeletePrebuild**](PrebuildAPI.md#DeletePrebuild) | **Delete** /project-config/prebuild/{prebuildId} | Delete prebuild
+[**GetPrebuild**](PrebuildAPI.md#GetPrebuild) | **Get** /project-config/prebuild/single/{prebuildId} | Get prebuild
+[**ListPrebuilds**](PrebuildAPI.md#ListPrebuilds) | **Get** /project-config/prebuild/{configName} | List prebuilds
 [**ProcessGitEvent**](PrebuildAPI.md#ProcessGitEvent) | **Post** /project-config/prebuild/process-git-event | ProcessGitEvent
 [**SetPrebuild**](PrebuildAPI.md#SetPrebuild) | **Put** /project-config/prebuild | Set prebuild
 
@@ -14,7 +14,7 @@ Method | HTTP request | Description
 
 ## DeletePrebuild
 
-> DeletePrebuild(ctx, projectConfigName, prebuildId).Force(force).Execute()
+> DeletePrebuild(ctx, prebuildId).Force(force).Execute()
 
 Delete prebuild
 
@@ -33,13 +33,12 @@ import (
 )
 
 func main() {
-	projectConfigName := "projectConfigName_example" // string | Project config name
 	prebuildId := "prebuildId_example" // string | Prebuild ID
 	force := true // bool | Force (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), projectConfigName, prebuildId).Force(force).Execute()
+	r, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), prebuildId).Force(force).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.DeletePrebuild``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -53,7 +52,6 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**projectConfigName** | **string** | Project config name | 
 **prebuildId** | **string** | Prebuild ID | 
 
 ### Other Parameters
@@ -63,7 +61,6 @@ Other parameters are passed through a pointer to a apiDeletePrebuildRequest stru
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-
 
  **force** | **bool** | Force | 
 

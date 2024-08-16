@@ -1,6 +1,11 @@
 name: daytona prebuild delete
 synopsis: Delete a prebuild configuration
 usage: daytona prebuild delete [flags]
+options:
+    - name: force
+      shorthand: f
+      default_value: "false"
+      usage: Force delete prebuild
 inherited_options:
     - name: help
       default_value: "false"

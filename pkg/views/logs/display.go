@@ -31,7 +31,7 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 	line := logEntry.Msg
 
 	prefixColor := getPrefixColor(index)
-	prefixText := logEntry.ProjectName
+	prefixText := logEntry.ProjectId
 
 	if index == WORKSPACE_INDEX {
 		prefixText = WORKSPACE_PREFIX

@@ -73,11 +73,10 @@ func ReadBuildLogs(activeProfile config.Profile, buildId string, query string, s
 	logs_view.CalculateLongestPrefixLength([]string{buildId})
 
 	for {
-		ws, _, err := GetWebsocketConn(fmt.Sprintf("/log/build/%s", buildId), &activeProfile, &query)
+		ws, res, err := GetWebsocketConn(fmt.Sprintf("/log/build/%s", buildId), &activeProfile, &query)
 		// We want to retry getting the logs if it fails
 		if err != nil {
-			// TODO: return log.Trace once https://github.com/daytonaio/daytona/issues/696 is resolved
-			// log.Trace(apiclient_util.HandleErrorResponse(res, err))
+			log.Trace(HandleErrorResponse(res, err))
 			time.Sleep(250 * time.Millisecond)
 			continue
 		}

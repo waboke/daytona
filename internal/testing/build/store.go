@@ -34,21 +34,9 @@ func (s *InMemoryBuildStore) Find(filter *build.Filter) (*build.Build, error) {
 }
 
 func (s *InMemoryBuildStore) List(filter *build.Filter) ([]*build.Build, error) {
-	builds := []*build.Build{}
-	for _, b := range s.builds {
-		if filter == nil {
-			builds = append(builds, b)
-			continue
-		}
-
-		if filter.States != nil {
-			for _, state := range filter.States {
-				if b.State == *state {
-					builds = append(builds, b)
-					break
-				}
-			}
-		}
+	builds, err := s.processFilters(filter)
+	if err != nil {
+		return nil, err
 	}
 
 	return builds, nil

@@ -536,28 +536,6 @@ paths:
       tags:
       - project-config
   /project-config/prebuild:
-    get:
-      description: List prebuilds
-      operationId: ListPrebuilds
-      parameters:
-      - description: Config name
-        in: path
-        name: configName
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            '*/*':
-              schema:
-                items:
-                  $ref: '#/components/schemas/PrebuildDTO'
-                type: array
-          description: OK
-      summary: List prebuilds
-      tags:
-      - prebuild
     put:
       description: Set prebuild
       operationId: SetPrebuild
@@ -595,7 +573,7 @@ paths:
       tags:
       - prebuild
       x-codegen-request-body-name: workspace
-  /project-config/prebuild/{prebuildId}:
+  /project-config/prebuild/single/{prebuildId}:
     get:
       description: Get prebuild
       operationId: GetPrebuild
@@ -616,17 +594,34 @@ paths:
       summary: Get prebuild
       tags:
       - prebuild
-  /project-config/prebuild/{projectConfigName}/{prebuildId}:
+  /project-config/prebuild/{configName}:
+    get:
+      description: List prebuilds
+      operationId: ListPrebuilds
+      parameters:
+      - description: Config name
+        in: path
+        name: configName
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                items:
+                  $ref: '#/components/schemas/PrebuildDTO'
+                type: array
+          description: OK
+      summary: List prebuilds
+      tags:
+      - prebuild
+  /project-config/prebuild/{prebuildId}:
     delete:
       description: Delete prebuild
       operationId: DeletePrebuild
       parameters:
-      - description: Project config name
-        in: path
-        name: projectConfigName
-        required: true
-        schema:
-          type: string
       - description: Prebuild ID
         in: path
         name: prebuildId

@@ -24,7 +24,6 @@ type PrebuildDTO struct {
 	TriggerFiles      []string `json:"triggerFiles" validate:"required"`
 } // @name PrebuildDTO
 
-// Todo - use PrebuildDTOs
 type CreatePrebuildDTO struct {
 	Id                string   `json:"id" validate:"optional"`
 	ProjectConfigName string   `json:"projectConfigName" validate:"required"`

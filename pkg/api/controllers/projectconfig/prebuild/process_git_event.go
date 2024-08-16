@@ -25,15 +25,15 @@ import (
 func ProcessGitEvent(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
-	gitProvider, err := server.GitProviderService.GetGitProviderForHttpRequest(ctx.Request)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for request: %s", err.Error()))
-		return
-	}
-
 	var payload map[string]interface{}
 	if err := ctx.BindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
+		return
+	}
+
+	gitProvider, err := server.GitProviderService.GetGitProviderForHttpRequest(ctx.Request)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for request: %s", err.Error()))
 		return
 	}
 

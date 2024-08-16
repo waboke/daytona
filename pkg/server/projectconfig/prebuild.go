@@ -276,8 +276,6 @@ func (s *ProjectConfigService) ProcessGitEvent(data gitprovider.GitEventData) er
 			return err
 		}
 
-		fmt.Println("commitsRange", commitsRange)
-
 		// Check if the commit interval has been reached
 		if commitsRange >= prebuild.CommitInterval {
 			buildsToTrigger = append(buildsToTrigger, build.Build{

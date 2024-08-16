@@ -34,7 +34,7 @@ type Build struct {
 	UpdatedAt   time.Time                  `json:"updatedAt" validate:"required"`
 } // @name Build
 
-func FetchCachedBuild(build *Build, builds []*Build) *buildconfig.CachedBuild {
+func GetCachedBuild(build *Build, builds []*Build) *buildconfig.CachedBuild {
 	var cachedBuild *Build
 
 	for _, existingBuild := range builds {

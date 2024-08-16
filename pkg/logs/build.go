@@ -39,7 +39,7 @@ func (bl *buildLogger) Write(p []byte) (n int, err error) {
 	var entry LogEntry
 	entry.Msg = string(p)
 	entry.Source = string(bl.source)
-	entry.ProjectName = bl.buildId
+	entry.ProjectId = bl.buildId
 
 	b, err := json.Marshal(entry)
 	if err != nil {
@@ -66,16 +66,16 @@ func (bl *buildLogger) Close() error {
 }
 
 func (bl *buildLogger) Cleanup() error {
-	projectLogsDir := filepath.Join(bl.logsDir, "builds", bl.buildId)
+	buildLogsDir := filepath.Join(bl.logsDir, "builds", bl.buildId)
 
-	_, err := os.Stat(projectLogsDir)
+	_, err := os.Stat(buildLogsDir)
 	if os.IsNotExist(err) {
 		return nil
 	} else if err != nil {
 		return err
 	}
 
-	return os.RemoveAll(projectLogsDir)
+	return os.RemoveAll(buildLogsDir)
 }
 
 func (l *loggerFactoryImpl) CreateBuildLogger(buildId string, source LogSource) Logger {

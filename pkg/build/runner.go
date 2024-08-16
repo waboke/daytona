@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/scheduler"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -67,7 +68,9 @@ func (r *BuildRunner) Stop() {
 }
 
 func (r *BuildRunner) Run() {
-	builds, err := r.buildStore.List(nil)
+	builds, err := r.buildStore.List(&Filter{
+		States: []*BuildState{util.Pointer(BuildStatePending), util.Pointer(BuildStateSuccess), util.Pointer(BuildStatePublished)},
+	})
 	if err != nil {
 		log.Error(err)
 		return
@@ -78,7 +81,7 @@ func (r *BuildRunner) Run() {
 		if currentBuild.State == BuildStatePending {
 			wg.Add(1)
 			if currentBuild.BuildConfig != nil {
-				currentBuild.BuildConfig.CachedBuild = FetchCachedBuild(currentBuild, builds)
+				currentBuild.BuildConfig.CachedBuild = GetCachedBuild(currentBuild, builds)
 			}
 			go r.RunBuildProcess(currentBuild, &wg)
 		}

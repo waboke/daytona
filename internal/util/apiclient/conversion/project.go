@@ -151,7 +151,7 @@ func CreateDtoToProject(createProjectDto project_dto.CreateProjectDTO) *project.
 	return p
 }
 
-func CreateConfigToProject(createProjectConfigDto pc_dto.CreateProjectConfigDTO) *project.Project {
+func CreateConfigDtoToProject(createProjectConfigDto pc_dto.CreateProjectConfigDTO) *project.Project {
 	return &project.Project{
 		Name:        createProjectConfigDto.Name,
 		Image:       *createProjectConfigDto.Image,

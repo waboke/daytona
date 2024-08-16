@@ -22,7 +22,7 @@ var projectConfigAddCmd = &cobra.Command{
 	Short:   "Add a project config",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		var projects []apiclient.CreateProjectDTO
+		var createDtos []apiclient.CreateProjectDTO
 		var existingProjectConfigNames []string
 		ctx := context.Background()
 
@@ -56,7 +56,7 @@ var projectConfigAddCmd = &cobra.Command{
 			DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
 		}
 
-		projects, err = workspace_util.GetProjectsCreationDataFromPrompt(workspace_util.ProjectsDataPromptConfig{
+		createDtos, err = workspace_util.GetProjectsCreationDataFromPrompt(workspace_util.ProjectsDataPromptConfig{
 			UserGitProviders:    gitProviders,
 			Manual:              manualFlag,
 			MultiProject:        false,
@@ -73,20 +73,20 @@ var projectConfigAddCmd = &cobra.Command{
 			}
 		}
 
-		create.ProjectsConfigurationChanged, err = create.RunProjectConfiguration(&projects, *projectDefaults)
+		create.ProjectsConfigurationChanged, err = create.RunProjectConfiguration(&createDtos, *projectDefaults)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		if len(projects) == 0 {
+		if len(createDtos) == 0 {
 			log.Fatal("no projects found")
 		}
 
-		if projects[0].Name == "" {
+		if createDtos[0].Name == "" {
 			log.Fatal("project config name is required")
 		}
 
-		initialSuggestion := projects[0].Name
+		initialSuggestion := createDtos[0].Name
 
 		chosenName := workspace_util.GetSuggestedName(initialSuggestion, existingProjectConfigNames)
 
@@ -94,7 +94,7 @@ var projectConfigAddCmd = &cobra.Command{
 			ChosenName:    &chosenName,
 			SuggestedName: chosenName,
 			ExistingNames: existingProjectConfigNames,
-			ProjectList:   &projects,
+			ProjectList:   &createDtos,
 			NameLabel:     "Project config",
 			Defaults:      projectDefaults,
 		}
@@ -106,13 +106,13 @@ var projectConfigAddCmd = &cobra.Command{
 
 		newProjectConfig := apiclient.CreateProjectConfigDTO{
 			Name:          chosenName,
-			BuildConfig:   projects[0].BuildConfig,
-			Image:         projects[0].Image,
-			User:          projects[0].User,
-			RepositoryUrl: projects[0].Source.Repository.Url,
+			BuildConfig:   createDtos[0].BuildConfig,
+			Image:         createDtos[0].Image,
+			User:          createDtos[0].User,
+			RepositoryUrl: createDtos[0].Source.Repository.Url,
 		}
 
-		newProjectConfig.EnvVars = *workspace_util.GetEnvVariables(projects[0].EnvVars, nil)
+		newProjectConfig.EnvVars = *workspace_util.GetEnvVariables(createDtos[0].EnvVars, nil)
 
 		res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
 		if err != nil {

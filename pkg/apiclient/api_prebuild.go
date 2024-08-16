@@ -23,11 +23,10 @@ import (
 type PrebuildAPIService service
 
 type ApiDeletePrebuildRequest struct {
-	ctx               context.Context
-	ApiService        *PrebuildAPIService
-	projectConfigName string
-	prebuildId        string
-	force             *bool
+	ctx        context.Context
+	ApiService *PrebuildAPIService
+	prebuildId string
+	force      *bool
 }
 
 // Force
@@ -46,16 +45,14 @@ DeletePrebuild Delete prebuild
 Delete prebuild
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param projectConfigName Project config name
 	@param prebuildId Prebuild ID
 	@return ApiDeletePrebuildRequest
 */
-func (a *PrebuildAPIService) DeletePrebuild(ctx context.Context, projectConfigName string, prebuildId string) ApiDeletePrebuildRequest {
+func (a *PrebuildAPIService) DeletePrebuild(ctx context.Context, prebuildId string) ApiDeletePrebuildRequest {
 	return ApiDeletePrebuildRequest{
-		ApiService:        a,
-		ctx:               ctx,
-		projectConfigName: projectConfigName,
-		prebuildId:        prebuildId,
+		ApiService: a,
+		ctx:        ctx,
+		prebuildId: prebuildId,
 	}
 }
 
@@ -72,8 +69,7 @@ func (a *PrebuildAPIService) DeletePrebuildExecute(r ApiDeletePrebuildRequest) (
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/project-config/prebuild/{projectConfigName}/{prebuildId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"projectConfigName"+"}", url.PathEscape(parameterValueToString(r.projectConfigName, "projectConfigName")), -1)
+	localVarPath := localBasePath + "/project-config/prebuild/{prebuildId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"prebuildId"+"}", url.PathEscape(parameterValueToString(r.prebuildId, "prebuildId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -185,7 +181,7 @@ func (a *PrebuildAPIService) GetPrebuildExecute(r ApiGetPrebuildRequest) (*Prebu
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/project-config/prebuild/{prebuildId}"
+	localVarPath := localBasePath + "/project-config/prebuild/single/{prebuildId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"prebuildId"+"}", url.PathEscape(parameterValueToString(r.prebuildId, "prebuildId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -303,7 +299,7 @@ func (a *PrebuildAPIService) ListPrebuildsExecute(r ApiListPrebuildsRequest) ([]
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/project-config/prebuild"
+	localVarPath := localBasePath + "/project-config/prebuild/{configName}"
 	localVarPath = strings.Replace(localVarPath, "{"+"configName"+"}", url.PathEscape(parameterValueToString(r.configName, "configName")), -1)
 
 	localVarHeaderParams := make(map[string]string)

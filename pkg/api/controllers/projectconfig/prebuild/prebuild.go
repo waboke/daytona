@@ -23,7 +23,7 @@ import (
 //	@Accept			json
 //	@Param			prebuildId	path		string	true	"Prebuild ID"
 //	@Success		200			{object}	PrebuildDTO
-//	@Router			/project-config/prebuild/{prebuildId} [get]
+//	@Router			/project-config/prebuild/single/{prebuildId} [get]
 //
 //	@id				GetPrebuild
 func GetPrebuild(ctx *gin.Context) {
@@ -81,10 +81,8 @@ func SetPrebuild(ctx *gin.Context) {
 // @Description	List prebuilds
 // @Accept			json
 // @Param			configName	path	string	true	"Config name"
-//
 // @Success		200			{array}	PrebuildDTO
-//
-// @Router			/project-config/prebuild [get]
+// @Router			/project-config/prebuild/{configName} [get]
 //
 // @id				ListPrebuilds
 func ListPrebuilds(ctx *gin.Context) {
@@ -114,15 +112,13 @@ func ListPrebuilds(ctx *gin.Context) {
 //	@Summary		Delete prebuild
 //	@Description	Delete prebuild
 //	@Accept			json
-//	@Param			projectConfigName	path	string	true	"Project config name"
-//	@Param			prebuildId			path	string	true	"Prebuild ID"
-//	@Param			force				query	bool	false	"Force"
+//	@Param			prebuildId	path	string	true	"Prebuild ID"
+//	@Param			force		query	bool	false	"Force"
 //	@Success		204
-//	@Router			/project-config/prebuild/{projectConfigName}/{prebuildId} [delete]
+//	@Router			/project-config/prebuild/{prebuildId} [delete]
 //
 //	@id				DeletePrebuild
 func DeletePrebuild(ctx *gin.Context) {
-	projectConfigName := ctx.Param("projectConfigName")
 	prebuildId := ctx.Param("prebuildId")
 	forceQuery := ctx.Query("force")
 
@@ -138,7 +134,19 @@ func DeletePrebuild(ctx *gin.Context) {
 	}
 
 	server := server.GetInstance(nil)
-	err = server.ProjectConfigService.DeletePrebuild(projectConfigName, prebuildId, force)
+	prebuild, err := server.ProjectConfigService.FindPrebuild(nil, &config.PrebuildFilter{
+		Id: &prebuildId,
+	})
+	if err != nil {
+		if config.IsPrebuildNotFound(err) {
+			ctx.JSON(200, &config.PrebuildConfig{})
+			return
+		}
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get prebuild: %s", err.Error()))
+		return
+	}
+
+	err = server.ProjectConfigService.DeletePrebuild(prebuild.ProjectConfigName, prebuild.Id, force)
 	if err != nil {
 		if config.IsPrebuildNotFound(err) {
 			ctx.Status(204)

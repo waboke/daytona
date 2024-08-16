@@ -25,7 +25,7 @@ const (
 type LogEntry struct {
 	Source      string `json:"source"`
 	WorkspaceId string `json:"workspaceId"`
-	ProjectName string `json:"projectName"`
+	ProjectId   string `json:"projectId"`
 	Msg         string `json:"msg"`
 	Level       string `json:"level"`
 	Time        string `json:"time"`
