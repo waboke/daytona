@@ -5,6 +5,7 @@ package gitprovider
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -278,6 +279,38 @@ func (g *GitHubGitProvider) getApiClient() *github.Client {
 	}
 
 	return client
+}
+
+func (g *GitHubGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (string, error) {
+	if staticContext.Sha == nil || *staticContext.Sha == "" {
+		return "", nil
+	}
+
+	client := g.getApiClient()
+
+	branches, _, err := client.Repositories.ListBranches(context.Background(), staticContext.Owner, staticContext.Name, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to list branches: %v", err)
+	}
+
+	var branchName string
+	for _, branch := range branches {
+		branchName = branch.GetName()
+
+		commitComparison, _, err := client.Repositories.CompareCommits(context.Background(), staticContext.Owner, staticContext.Name, branchName, *staticContext.Sha)
+		if err != nil {
+			return "", fmt.Errorf("error comparing commits: %w", err)
+		}
+		if commitComparison.GetStatus() == "identical" || commitComparison.GetStatus() == "behind" {
+			return branchName, nil
+		}
+	}
+
+	if branchName == "" {
+		return "", fmt.Errorf("branch not found for SHA: %s", *staticContext.Sha)
+	}
+
+	return branchName, nil
 }
 
 func (g *GitHubGitProvider) getPrContext(staticContext *StaticGitContext) (*StaticGitContext, error) {
