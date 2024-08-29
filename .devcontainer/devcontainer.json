@@ -7,7 +7,7 @@
 		"CGO_ENABLED": "0",
 		"DAYTONA_WS_ID": ""
 	},
-	"postCreateCommand": ".devcontainer/postcreate.sh",
+	"onCreateCommand": ".devcontainer/postcreate.sh",
 	"postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
 	"remoteUser": "daytona"
 }
