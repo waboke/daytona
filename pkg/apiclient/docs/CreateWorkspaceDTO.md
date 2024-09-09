@@ -6,14 +6,14 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** |  | 
 **Name** | **string** |  | 
-**Projects** | [**[]CreateProjectDTO**](CreateProjectDTO.md) |  | 
+**Projects** | [**[]ProjectDataDTO**](ProjectDataDTO.md) |  | 
 **Target** | **string** |  | 
 
 ## Methods
 
 ### NewCreateWorkspaceDTO
 
-`func NewCreateWorkspaceDTO(id string, name string, projects []CreateProjectDTO, target string, ) *CreateWorkspaceDTO`
+`func NewCreateWorkspaceDTO(id string, name string, projects []ProjectDataDTO, target string, ) *CreateWorkspaceDTO`
 
 NewCreateWorkspaceDTO instantiates a new CreateWorkspaceDTO object
 This constructor will assign default values to properties that have it defined,
@@ -70,20 +70,20 @@ SetName sets Name field to given value.
 
 ### GetProjects
 
-`func (o *CreateWorkspaceDTO) GetProjects() []CreateProjectDTO`
+`func (o *CreateWorkspaceDTO) GetProjects() []ProjectDataDTO`
 
 GetProjects returns the Projects field if non-nil, zero value otherwise.
 
 ### GetProjectsOk
 
-`func (o *CreateWorkspaceDTO) GetProjectsOk() (*[]CreateProjectDTO, bool)`
+`func (o *CreateWorkspaceDTO) GetProjectsOk() (*[]ProjectDataDTO, bool)`
 
 GetProjectsOk returns a tuple with the Projects field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetProjects
 
-`func (o *CreateWorkspaceDTO) SetProjects(v []CreateProjectDTO)`
+`func (o *CreateWorkspaceDTO) SetProjects(v []ProjectDataDTO)`
 
 SetProjects sets Projects field to given value.
 

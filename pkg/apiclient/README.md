@@ -128,6 +128,10 @@ Class | Method | HTTP request | Description
 *TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
 *TargetAPI* | [**RemoveTarget**](docs/TargetAPI.md#removetarget) | **Delete** /target/{target} | Remove a target
 *TargetAPI* | [**SetTarget**](docs/TargetAPI.md#settarget) | **Put** /target | Set a target
+*TemplateAPI* | [**DeleteTemplate**](docs/TemplateAPI.md#deletetemplate) | **Delete** /template/{templateName} | Delete template data
+*TemplateAPI* | [**GetTemplate**](docs/TemplateAPI.md#gettemplate) | **Get** /template/{templateName} | Get template data
+*TemplateAPI* | [**ListTemplates**](docs/TemplateAPI.md#listtemplates) | **Get** /template | List templates
+*TemplateAPI* | [**SetTemplate**](docs/TemplateAPI.md#settemplate) | **Put** /template | Set template data
 *WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace | Create a workspace
 *WorkspaceAPI* | [**GetWorkspace**](docs/WorkspaceAPI.md#getworkspace) | **Get** /workspace/{workspaceId} | Get workspace info
 *WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces
@@ -152,7 +156,6 @@ Class | Method | HTTP request | Description
  - [CreateBuildDTO](docs/CreateBuildDTO.md)
  - [CreatePrebuildDTO](docs/CreatePrebuildDTO.md)
  - [CreateProjectConfigDTO](docs/CreateProjectConfigDTO.md)
- - [CreateProjectDTO](docs/CreateProjectDTO.md)
  - [CreateProjectSourceDTO](docs/CreateProjectSourceDTO.md)
  - [CreateWorkspaceDTO](docs/CreateWorkspaceDTO.md)
  - [DevcontainerConfig](docs/DevcontainerConfig.md)
@@ -173,6 +176,7 @@ Class | Method | HTTP request | Description
  - [ProfileData](docs/ProfileData.md)
  - [Project](docs/Project.md)
  - [ProjectConfig](docs/ProjectConfig.md)
+ - [ProjectDataDTO](docs/ProjectDataDTO.md)
  - [ProjectInfo](docs/ProjectInfo.md)
  - [ProjectState](docs/ProjectState.md)
  - [Provider](docs/Provider.md)
@@ -186,6 +190,7 @@ Class | Method | HTTP request | Description
  - [SetGitProviderConfig](docs/SetGitProviderConfig.md)
  - [SetProjectState](docs/SetProjectState.md)
  - [Status](docs/Status.md)
+ - [Template](docs/Template.md)
  - [Workspace](docs/Workspace.md)
  - [WorkspaceDTO](docs/WorkspaceDTO.md)
  - [WorkspaceInfo](docs/WorkspaceInfo.md)

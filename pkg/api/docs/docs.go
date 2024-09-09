@@ -1437,6 +1437,109 @@ const docTemplate = `{
                 }
             }
         },
+        "/template": {
+            "get": {
+                "description": "List templates",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "template"
+                ],
+                "summary": "List templates",
+                "operationId": "ListTemplates",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Template"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Set template data",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "template"
+                ],
+                "summary": "Set template data",
+                "operationId": "SetTemplate",
+                "parameters": [
+                    {
+                        "description": "Template",
+                        "name": "template",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Template"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/template/{templateName}": {
+            "get": {
+                "description": "Get template data",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "template"
+                ],
+                "summary": "Get template data",
+                "operationId": "GetTemplate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template name",
+                        "name": "templateName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Template"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete template data",
+                "tags": [
+                    "template"
+                ],
+                "summary": "Delete template data",
+                "operationId": "DeleteTemplate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template name",
+                        "name": "templateName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/workspace": {
             "get": {
                 "description": "List workspaces",
@@ -1916,37 +2019,6 @@ const docTemplate = `{
                 }
             }
         },
-        "CreateProjectDTO": {
-            "type": "object",
-            "required": [
-                "envVars",
-                "name",
-                "source"
-            ],
-            "properties": {
-                "buildConfig": {
-                    "$ref": "#/definitions/BuildConfig"
-                },
-                "envVars": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "image": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "source": {
-                    "$ref": "#/definitions/CreateProjectSourceDTO"
-                },
-                "user": {
-                    "type": "string"
-                }
-            }
-        },
         "CreateProjectSourceDTO": {
             "type": "object",
             "required": [
@@ -1976,7 +2048,7 @@ const docTemplate = `{
                 "projects": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/CreateProjectDTO"
+                        "$ref": "#/definitions/ProjectDataDTO"
                     }
                 },
                 "target": {
@@ -2436,6 +2508,37 @@ const docTemplate = `{
                 }
             }
         },
+        "ProjectDataDTO": {
+            "type": "object",
+            "required": [
+                "envVars",
+                "name",
+                "source"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "source": {
+                    "$ref": "#/definitions/CreateProjectSourceDTO"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
         "ProjectInfo": {
             "type": "object",
             "required": [
@@ -2681,6 +2784,24 @@ const docTemplate = `{
                 "Copied",
                 "UpdatedButUnmerged"
             ]
+        },
+        "Template": {
+            "type": "object",
+            "required": [
+                "name",
+                "projectConfigs"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "projectConfigs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
         },
         "Workspace": {
             "type": "object",

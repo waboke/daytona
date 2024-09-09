@@ -114,7 +114,7 @@ func getTableRowData(projectConfig apiclient.ProjectConfig, apiServerConfig *api
 		ImageUser: &apiServerConfig.DefaultProjectUser,
 	}
 
-	createProjectDto := apiclient.CreateProjectDTO{
+	createProjectDto := apiclient.ProjectDataDTO{
 		BuildConfig: projectConfig.BuildConfig,
 	}
 

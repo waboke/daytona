@@ -51,7 +51,12 @@ var prebuildAddCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		projectConfig = selection.GetProjectConfigFromPrompt(projectConfigList, 0, false, true, "Prebuild")
+		projectConfig = selection.GetProjectConfigFromPrompt(selection.ProjectConfigPromptConfig{
+			ProjectConfigs: projectConfigList,
+			ProjectOrder:   0,
+			ShowNewOption:  true,
+			ActionVerb:     "Add",
+		})
 		if projectConfig == nil {
 			log.Fatal("No project config selected")
 		}

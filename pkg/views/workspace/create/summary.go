@@ -37,7 +37,7 @@ type SummaryModel struct {
 	width       int
 	quitting    bool
 	name        string
-	projectList []apiclient.CreateProjectDTO
+	projectList []apiclient.ProjectDataDTO
 	defaults    *views_util.ProjectConfigDefaults
 	nameLabel   string
 }
@@ -46,7 +46,7 @@ type SubmissionFormConfig struct {
 	ChosenName    *string
 	SuggestedName string
 	ExistingNames []string
-	ProjectList   *[]apiclient.CreateProjectDTO
+	ProjectList   *[]apiclient.ProjectDataDTO
 	NameLabel     string
 	Defaults      *views_util.ProjectConfigDefaults
 }
@@ -85,7 +85,7 @@ func RunSubmissionForm(config SubmissionFormConfig) error {
 	return RunSubmissionForm(config)
 }
 
-func RenderSummary(name string, projectList []apiclient.CreateProjectDTO, defaults *views_util.ProjectConfigDefaults, nameLabel string) (string, error) {
+func RenderSummary(name string, projectList []apiclient.ProjectDataDTO, defaults *views_util.ProjectConfigDefaults, nameLabel string) (string, error) {
 	var output string
 	if name == "" {
 		output = views.GetStyledMainTitle("SUMMARY")
@@ -112,7 +112,7 @@ func RenderSummary(name string, projectList []apiclient.CreateProjectDTO, defaul
 	return output, nil
 }
 
-func renderProjectDetails(project apiclient.CreateProjectDTO, buildChoice views_util.BuildChoice, choiceName string) string {
+func renderProjectDetails(project apiclient.ProjectDataDTO, buildChoice views_util.BuildChoice, choiceName string) string {
 	output := projectDetailOutput(Build, choiceName)
 
 	if buildChoice == views_util.DEVCONTAINER {
@@ -161,8 +161,12 @@ func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
 	m := SummaryModel{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
-	m.name = *config.ChosenName
-	m.projectList = *config.ProjectList
+	if config.ChosenName != nil {
+		m.name = *config.ChosenName
+	}
+	if config.ProjectList != nil {
+		m.projectList = *config.ProjectList
+	}
 	m.defaults = config.Defaults
 	m.nameLabel = config.NameLabel
 

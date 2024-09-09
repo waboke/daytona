@@ -25,7 +25,7 @@ type ProjectConfigDefaults struct {
 	DevcontainerFilePath string
 }
 
-func GetProjectBuildChoice(project apiclient.CreateProjectDTO, defaults *ProjectConfigDefaults) (BuildChoice, string) {
+func GetProjectBuildChoice(project apiclient.ProjectDataDTO, defaults *ProjectConfigDefaults) (BuildChoice, string) {
 	if project.BuildConfig == nil {
 		if project.Image != nil && project.User != nil &&
 			defaults.Image != nil && defaults.ImageUser != nil &&

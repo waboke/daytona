@@ -5,21 +5,23 @@ package projectconfig
 
 import (
 	"context"
-	"fmt"
+	"net/http"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var projectConfigSetDefaultCmd = &cobra.Command{
-	Use:   "set-default",
-	Short: "Set project config info",
+var templateUpdateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update a template",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		var projectConfigName string
+		var template *apiclient.Template
+		var res *http.Response
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -28,32 +30,33 @@ var projectConfigSetDefaultCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
+			templateList, res, err := apiClient.TemplateAPI.ListTemplates(ctx).Execute()
 			if err != nil {
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 
-			projectConfig := selection.GetProjectConfigFromPrompt(selection.ProjectConfigPromptConfig{
-				ProjectConfigs: projectConfigList,
-				ProjectOrder:   0,
-				ActionVerb:     "Set as default",
-			})
-			if projectConfig == nil {
+			template = selection.GetTemplateFromPrompt(templateList, "Update")
+			if template == nil {
 				return
 			}
-			projectConfigName = projectConfig.Name
 		} else {
-			projectConfigName = args[0]
+			template, res, err = apiClient.TemplateAPI.GetTemplate(ctx, args[0]).Execute()
+			if err != nil {
+				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
+			}
 		}
 
-		res, err := apiClient.ProjectConfigAPI.SetDefaultProjectConfig(ctx, projectConfigName).Execute()
+		if template == nil {
+			return
+		}
+
+		var newTemplate apiclient.Template
+
+		res, err = apiClient.TemplateAPI.SetTemplate(ctx).Template(newTemplate).Execute()
 		if err != nil {
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		views.RenderInfoMessage(fmt.Sprintf("Project config '%s' set as default", projectConfigName))
+		views.RenderInfoMessage("Project config updated successfully")
 	},
-}
-
-func init() {
 }

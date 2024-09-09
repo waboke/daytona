@@ -33,8 +33,8 @@ type ProjectsDataPromptConfig struct {
 	Defaults            *views_util.ProjectConfigDefaults
 }
 
-func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apiclient.CreateProjectDTO, error) {
-	var projectList []apiclient.CreateProjectDTO
+func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apiclient.ProjectDataDTO, error) {
+	var projectList []apiclient.ProjectDataDTO
 	// keep track of visited repos, will help in keeping project names unique
 	// since these are later saved into the db under a unique constraint field.
 	selectedRepos := make(map[string]int)
@@ -53,7 +53,12 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 		}
 
 		if len(config.ProjectConfigs) > 0 && !config.BlankProject {
-			projectConfig := selection.GetProjectConfigFromPrompt(config.ProjectConfigs, i, true, false, "Use")
+			projectConfig := selection.GetProjectConfigFromPrompt(selection.ProjectConfigPromptConfig{
+				ProjectConfigs:  config.ProjectConfigs,
+				ProjectOrder:    i,
+				ShowBlankOption: true,
+				ActionVerb:      "Use",
+			})
 			if projectConfig == nil {
 				return nil, common.ErrCtrlCAbort
 			}
@@ -91,7 +96,7 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 					return nil, apiclient_util.HandleErrorResponse(res, err)
 				}
 
-				createProjectDto := apiclient.CreateProjectDTO{
+				createProjectDto := apiclient.ProjectDataDTO{
 					Name: projectName,
 					Source: apiclient.CreateProjectSourceDTO{
 						Repository: *configRepo,
@@ -219,8 +224,8 @@ func GetBranchFromProjectConfig(projectConfig *apiclient.ProjectConfig, apiClien
 	}, nil
 }
 
-func GetCreateProjectDtoFromFlags(projectConfigurationFlags ProjectConfigurationFlags) (*apiclient.CreateProjectDTO, error) {
-	project := &apiclient.CreateProjectDTO{
+func GetCreateProjectDtoFromFlags(projectConfigurationFlags ProjectConfigurationFlags) (*apiclient.ProjectDataDTO, error) {
+	project := &apiclient.ProjectDataDTO{
 		BuildConfig: &apiclient.BuildConfig{},
 	}
 
@@ -259,8 +264,8 @@ func GetCreateProjectDtoFromFlags(projectConfigurationFlags ProjectConfiguration
 	return project, nil
 }
 
-func newCreateProjectConfigDTO(config ProjectsDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string) apiclient.CreateProjectDTO {
-	project := apiclient.CreateProjectDTO{
+func newCreateProjectConfigDTO(config ProjectsDataPromptConfig, providerRepo *apiclient.GitRepository, providerRepoName string) apiclient.ProjectDataDTO {
+	project := apiclient.ProjectDataDTO{
 		Name: providerRepoName,
 		Source: apiclient.CreateProjectSourceDTO{
 			Repository: *providerRepo,

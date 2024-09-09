@@ -35,6 +35,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/projectconfig"
 	"github.com/daytonaio/daytona/pkg/server/providertargets"
 	"github.com/daytonaio/daytona/pkg/server/registry"
+	"github.com/daytonaio/daytona/pkg/server/template"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -185,6 +186,10 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 	if err != nil {
 		return nil, err
 	}
+	templateStore, err := db.NewTemplateStore(dbConnection)
+	if err != nil {
+		return nil, err
+	}
 	gitProviderConfigStore, err := db.NewGitProviderConfigStore(dbConnection)
 	if err != nil {
 		return nil, err
@@ -234,6 +239,10 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 		ConfigStore:             projectConfigStore,
 		BuildService:            buildService,
 		GitProviderService:      gitProviderService,
+	})
+
+	templateService := template.NewTemplateService(template.TemplateServiceConfig{
+		TemplateStore: templateStore,
 	})
 
 	err = projectConfigService.StartRetentionPoller()
@@ -299,6 +308,7 @@ func GetInstance(c *server.Config, configDir string, telemetryService telemetry.
 		ContainerRegistryService: containerRegistryService,
 		BuildService:             buildService,
 		ProjectConfigService:     projectConfigService,
+		TemplateService:          templateService,
 		ServerApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 		ServerUrl:                headscaleUrl,
 		DefaultProjectImage:      c.DefaultProjectImage,

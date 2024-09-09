@@ -16,11 +16,11 @@ import (
 	"fmt"
 )
 
-// checks if the CreateProjectDTO type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &CreateProjectDTO{}
+// checks if the ProjectDataDTO type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &ProjectDataDTO{}
 
-// CreateProjectDTO struct for CreateProjectDTO
-type CreateProjectDTO struct {
+// ProjectDataDTO struct for ProjectDataDTO
+type ProjectDataDTO struct {
 	BuildConfig *BuildConfig           `json:"buildConfig,omitempty"`
 	EnvVars     map[string]string      `json:"envVars"`
 	Image       *string                `json:"image,omitempty"`
@@ -29,30 +29,30 @@ type CreateProjectDTO struct {
 	User        *string                `json:"user,omitempty"`
 }
 
-type _CreateProjectDTO CreateProjectDTO
+type _ProjectDataDTO ProjectDataDTO
 
-// NewCreateProjectDTO instantiates a new CreateProjectDTO object
+// NewProjectDataDTO instantiates a new ProjectDataDTO object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateProjectDTO(envVars map[string]string, name string, source CreateProjectSourceDTO) *CreateProjectDTO {
-	this := CreateProjectDTO{}
+func NewProjectDataDTO(envVars map[string]string, name string, source CreateProjectSourceDTO) *ProjectDataDTO {
+	this := ProjectDataDTO{}
 	this.EnvVars = envVars
 	this.Name = name
 	this.Source = source
 	return &this
 }
 
-// NewCreateProjectDTOWithDefaults instantiates a new CreateProjectDTO object
+// NewProjectDataDTOWithDefaults instantiates a new ProjectDataDTO object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewCreateProjectDTOWithDefaults() *CreateProjectDTO {
-	this := CreateProjectDTO{}
+func NewProjectDataDTOWithDefaults() *ProjectDataDTO {
+	this := ProjectDataDTO{}
 	return &this
 }
 
 // GetBuildConfig returns the BuildConfig field value if set, zero value otherwise.
-func (o *CreateProjectDTO) GetBuildConfig() BuildConfig {
+func (o *ProjectDataDTO) GetBuildConfig() BuildConfig {
 	if o == nil || IsNil(o.BuildConfig) {
 		var ret BuildConfig
 		return ret
@@ -62,7 +62,7 @@ func (o *CreateProjectDTO) GetBuildConfig() BuildConfig {
 
 // GetBuildConfigOk returns a tuple with the BuildConfig field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateProjectDTO) GetBuildConfigOk() (*BuildConfig, bool) {
+func (o *ProjectDataDTO) GetBuildConfigOk() (*BuildConfig, bool) {
 	if o == nil || IsNil(o.BuildConfig) {
 		return nil, false
 	}
@@ -70,7 +70,7 @@ func (o *CreateProjectDTO) GetBuildConfigOk() (*BuildConfig, bool) {
 }
 
 // HasBuildConfig returns a boolean if a field has been set.
-func (o *CreateProjectDTO) HasBuildConfig() bool {
+func (o *ProjectDataDTO) HasBuildConfig() bool {
 	if o != nil && !IsNil(o.BuildConfig) {
 		return true
 	}
@@ -79,12 +79,12 @@ func (o *CreateProjectDTO) HasBuildConfig() bool {
 }
 
 // SetBuildConfig gets a reference to the given BuildConfig and assigns it to the BuildConfig field.
-func (o *CreateProjectDTO) SetBuildConfig(v BuildConfig) {
+func (o *ProjectDataDTO) SetBuildConfig(v BuildConfig) {
 	o.BuildConfig = &v
 }
 
 // GetEnvVars returns the EnvVars field value
-func (o *CreateProjectDTO) GetEnvVars() map[string]string {
+func (o *ProjectDataDTO) GetEnvVars() map[string]string {
 	if o == nil {
 		var ret map[string]string
 		return ret
@@ -95,7 +95,7 @@ func (o *CreateProjectDTO) GetEnvVars() map[string]string {
 
 // GetEnvVarsOk returns a tuple with the EnvVars field value
 // and a boolean to check if the value has been set.
-func (o *CreateProjectDTO) GetEnvVarsOk() (*map[string]string, bool) {
+func (o *ProjectDataDTO) GetEnvVarsOk() (*map[string]string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -103,12 +103,12 @@ func (o *CreateProjectDTO) GetEnvVarsOk() (*map[string]string, bool) {
 }
 
 // SetEnvVars sets field value
-func (o *CreateProjectDTO) SetEnvVars(v map[string]string) {
+func (o *ProjectDataDTO) SetEnvVars(v map[string]string) {
 	o.EnvVars = v
 }
 
 // GetImage returns the Image field value if set, zero value otherwise.
-func (o *CreateProjectDTO) GetImage() string {
+func (o *ProjectDataDTO) GetImage() string {
 	if o == nil || IsNil(o.Image) {
 		var ret string
 		return ret
@@ -118,7 +118,7 @@ func (o *CreateProjectDTO) GetImage() string {
 
 // GetImageOk returns a tuple with the Image field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateProjectDTO) GetImageOk() (*string, bool) {
+func (o *ProjectDataDTO) GetImageOk() (*string, bool) {
 	if o == nil || IsNil(o.Image) {
 		return nil, false
 	}
@@ -126,7 +126,7 @@ func (o *CreateProjectDTO) GetImageOk() (*string, bool) {
 }
 
 // HasImage returns a boolean if a field has been set.
-func (o *CreateProjectDTO) HasImage() bool {
+func (o *ProjectDataDTO) HasImage() bool {
 	if o != nil && !IsNil(o.Image) {
 		return true
 	}
@@ -135,12 +135,12 @@ func (o *CreateProjectDTO) HasImage() bool {
 }
 
 // SetImage gets a reference to the given string and assigns it to the Image field.
-func (o *CreateProjectDTO) SetImage(v string) {
+func (o *ProjectDataDTO) SetImage(v string) {
 	o.Image = &v
 }
 
 // GetName returns the Name field value
-func (o *CreateProjectDTO) GetName() string {
+func (o *ProjectDataDTO) GetName() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -151,7 +151,7 @@ func (o *CreateProjectDTO) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
-func (o *CreateProjectDTO) GetNameOk() (*string, bool) {
+func (o *ProjectDataDTO) GetNameOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -159,12 +159,12 @@ func (o *CreateProjectDTO) GetNameOk() (*string, bool) {
 }
 
 // SetName sets field value
-func (o *CreateProjectDTO) SetName(v string) {
+func (o *ProjectDataDTO) SetName(v string) {
 	o.Name = v
 }
 
 // GetSource returns the Source field value
-func (o *CreateProjectDTO) GetSource() CreateProjectSourceDTO {
+func (o *ProjectDataDTO) GetSource() CreateProjectSourceDTO {
 	if o == nil {
 		var ret CreateProjectSourceDTO
 		return ret
@@ -175,7 +175,7 @@ func (o *CreateProjectDTO) GetSource() CreateProjectSourceDTO {
 
 // GetSourceOk returns a tuple with the Source field value
 // and a boolean to check if the value has been set.
-func (o *CreateProjectDTO) GetSourceOk() (*CreateProjectSourceDTO, bool) {
+func (o *ProjectDataDTO) GetSourceOk() (*CreateProjectSourceDTO, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -183,12 +183,12 @@ func (o *CreateProjectDTO) GetSourceOk() (*CreateProjectSourceDTO, bool) {
 }
 
 // SetSource sets field value
-func (o *CreateProjectDTO) SetSource(v CreateProjectSourceDTO) {
+func (o *ProjectDataDTO) SetSource(v CreateProjectSourceDTO) {
 	o.Source = v
 }
 
 // GetUser returns the User field value if set, zero value otherwise.
-func (o *CreateProjectDTO) GetUser() string {
+func (o *ProjectDataDTO) GetUser() string {
 	if o == nil || IsNil(o.User) {
 		var ret string
 		return ret
@@ -198,7 +198,7 @@ func (o *CreateProjectDTO) GetUser() string {
 
 // GetUserOk returns a tuple with the User field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateProjectDTO) GetUserOk() (*string, bool) {
+func (o *ProjectDataDTO) GetUserOk() (*string, bool) {
 	if o == nil || IsNil(o.User) {
 		return nil, false
 	}
@@ -206,7 +206,7 @@ func (o *CreateProjectDTO) GetUserOk() (*string, bool) {
 }
 
 // HasUser returns a boolean if a field has been set.
-func (o *CreateProjectDTO) HasUser() bool {
+func (o *ProjectDataDTO) HasUser() bool {
 	if o != nil && !IsNil(o.User) {
 		return true
 	}
@@ -215,11 +215,11 @@ func (o *CreateProjectDTO) HasUser() bool {
 }
 
 // SetUser gets a reference to the given string and assigns it to the User field.
-func (o *CreateProjectDTO) SetUser(v string) {
+func (o *ProjectDataDTO) SetUser(v string) {
 	o.User = &v
 }
 
-func (o CreateProjectDTO) MarshalJSON() ([]byte, error) {
+func (o ProjectDataDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -227,7 +227,7 @@ func (o CreateProjectDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o CreateProjectDTO) ToMap() (map[string]interface{}, error) {
+func (o ProjectDataDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.BuildConfig) {
 		toSerialize["buildConfig"] = o.BuildConfig
@@ -244,7 +244,7 @@ func (o CreateProjectDTO) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *CreateProjectDTO) UnmarshalJSON(data []byte) (err error) {
+func (o *ProjectDataDTO) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -268,53 +268,53 @@ func (o *CreateProjectDTO) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varCreateProjectDTO := _CreateProjectDTO{}
+	varProjectDataDTO := _ProjectDataDTO{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateProjectDTO)
+	err = decoder.Decode(&varProjectDataDTO)
 
 	if err != nil {
 		return err
 	}
 
-	*o = CreateProjectDTO(varCreateProjectDTO)
+	*o = ProjectDataDTO(varProjectDataDTO)
 
 	return err
 }
 
-type NullableCreateProjectDTO struct {
-	value *CreateProjectDTO
+type NullableProjectDataDTO struct {
+	value *ProjectDataDTO
 	isSet bool
 }
 
-func (v NullableCreateProjectDTO) Get() *CreateProjectDTO {
+func (v NullableProjectDataDTO) Get() *ProjectDataDTO {
 	return v.value
 }
 
-func (v *NullableCreateProjectDTO) Set(val *CreateProjectDTO) {
+func (v *NullableProjectDataDTO) Set(val *ProjectDataDTO) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableCreateProjectDTO) IsSet() bool {
+func (v NullableProjectDataDTO) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableCreateProjectDTO) Unset() {
+func (v *NullableProjectDataDTO) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableCreateProjectDTO(val *CreateProjectDTO) *NullableCreateProjectDTO {
-	return &NullableCreateProjectDTO{value: val, isSet: true}
+func NewNullableProjectDataDTO(val *ProjectDataDTO) *NullableProjectDataDTO {
+	return &NullableProjectDataDTO{value: val, isSet: true}
 }
 
-func (v NullableCreateProjectDTO) MarshalJSON() ([]byte, error) {
+func (v NullableProjectDataDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableCreateProjectDTO) UnmarshalJSON(src []byte) error {
+func (v *NullableProjectDataDTO) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

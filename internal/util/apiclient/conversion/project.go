@@ -132,7 +132,7 @@ func ToProjectConfig(createProjectConfigDto pc_dto.CreateProjectConfigDTO) *conf
 	return result
 }
 
-func CreateDtoToProject(createProjectDto project_dto.CreateProjectDTO) *project.Project {
+func CreateDtoToProject(createProjectDto project_dto.ProjectDataDTO) *project.Project {
 	p := &project.Project{
 		Name:        createProjectDto.Name,
 		BuildConfig: createProjectDto.BuildConfig,

@@ -69,7 +69,7 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 		return nil, fmt.Errorf("please provide the repository URL in order to set up custom project config details through the CLI")
 	}
 
-	var createDtos []apiclient.CreateProjectDTO
+	var createDtos []apiclient.ProjectDataDTO
 	existingProjectConfigNames := getExistingProjectConfigNames(apiClient)
 
 	apiServerConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()

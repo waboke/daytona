@@ -25,6 +25,7 @@ import (
 	. "github.com/daytonaio/daytona/pkg/cmd/server"
 	. "github.com/daytonaio/daytona/pkg/cmd/target"
 	. "github.com/daytonaio/daytona/pkg/cmd/telemetry"
+	. "github.com/daytonaio/daytona/pkg/cmd/template"
 	. "github.com/daytonaio/daytona/pkg/cmd/workspace"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
@@ -54,6 +55,7 @@ func Execute() {
 	rootCmd.AddCommand(CreateCmd)
 	rootCmd.AddCommand(DeleteCmd)
 	rootCmd.AddCommand(ProjectConfigCmd)
+	rootCmd.AddCommand(TemplateCmd)
 	rootCmd.AddCommand(ServeCmd)
 	rootCmd.AddCommand(ServerCmd)
 	rootCmd.AddCommand(ApiKeyCmd)

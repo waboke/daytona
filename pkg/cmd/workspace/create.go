@@ -43,7 +43,7 @@ var CreateCmd = &cobra.Command{
 	GroupID: util.WORKSPACE_GROUP,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
-		var projects []apiclient.CreateProjectDTO
+		var projects []apiclient.ProjectDataDTO
 		var workspaceName string
 		var existingWorkspaceNames []string
 		var existingProjectConfigName *string
@@ -272,7 +272,7 @@ func getTarget(targetList []apiclient.ProviderTarget, activeProfileName string) 
 	return target.GetTargetFromPrompt(targetList, activeProfileName, false)
 }
 
-func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.CreateProjectDTO, workspaceNames []string, ctx context.Context) error {
+func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, projects *[]apiclient.ProjectDataDTO, workspaceNames []string, ctx context.Context) error {
 	if workspace_util.CheckAnyProjectConfigurationFlagSet(projectConfigurationFlags) {
 		return fmt.Errorf("please provide the repository URL in order to set up custom project details through the CLI")
 	}
@@ -334,7 +334,7 @@ func processPrompting(apiClient *apiclient.APIClient, workspaceName *string, pro
 	return nil
 }
 
-func processCmdArgument(argument string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO, ctx context.Context) (*string, error) {
+func processCmdArgument(argument string, apiClient *apiclient.APIClient, projects *[]apiclient.ProjectDataDTO, ctx context.Context) (*string, error) {
 	if *projectConfigurationFlags.Builder != "" && *projectConfigurationFlags.Builder != views_util.DEVCONTAINER && *projectConfigurationFlags.DevcontainerPath != "" {
 		return nil, fmt.Errorf("can't set devcontainer file path if builder is not set to %s", views_util.DEVCONTAINER)
 	}
@@ -356,7 +356,7 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, project
 	return workspace_util.AddProjectFromConfig(projectConfig, apiClient, projects, *projectConfigurationFlags.Branch)
 }
 
-func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO, ctx context.Context) (*string, error) {
+func processGitURL(repoUrl string, apiClient *apiclient.APIClient, projects *[]apiclient.ProjectDataDTO, ctx context.Context) (*string, error) {
 	encodedURLParam := url.QueryEscape(repoUrl)
 
 	if !blankFlag {

@@ -45,6 +45,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/sample"
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
 	"github.com/daytonaio/daytona/pkg/api/controllers/target"
+	"github.com/daytonaio/daytona/pkg/api/controllers/template"
 	"github.com/daytonaio/daytona/pkg/api/controllers/workspace"
 
 	"github.com/gin-gonic/gin"
@@ -164,6 +165,14 @@ func (a *ApiServer) Start() error {
 	}
 
 	public.POST(constants.WEBHOOK_EVENT_ROUTE, prebuild.ProcessGitEvent)
+
+	templateController := protected.Group("/template")
+	{
+		templateController.GET("/", template.ListTemplates)
+		templateController.GET("/:templateName", template.GetTemplate)
+		templateController.PUT("/", template.SetTemplate)
+		templateController.DELETE("/:templateName", template.DeleteTemplate)
+	}
 
 	providerController := protected.Group("/provider")
 	{

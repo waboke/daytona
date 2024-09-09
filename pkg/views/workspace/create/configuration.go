@@ -32,7 +32,7 @@ type ProjectConfigurationData struct {
 	EnvVars              map[string]string
 }
 
-func NewConfigurationData(buildChoice views_util.BuildChoice, devContainerFilePath string, currentProject *apiclient.CreateProjectDTO, defaults *views_util.ProjectConfigDefaults) *ProjectConfigurationData {
+func NewConfigurationData(buildChoice views_util.BuildChoice, devContainerFilePath string, currentProject *apiclient.ProjectDataDTO, defaults *views_util.ProjectConfigDefaults) *ProjectConfigurationData {
 	projectConfigurationData := &ProjectConfigurationData{
 		BuildChoice:          string(buildChoice),
 		DevcontainerFilePath: defaults.DevcontainerFilePath,
@@ -56,8 +56,8 @@ func NewConfigurationData(buildChoice views_util.BuildChoice, devContainerFilePa
 	return projectConfigurationData
 }
 
-func RunProjectConfiguration(projectList *[]apiclient.CreateProjectDTO, defaults views_util.ProjectConfigDefaults) (bool, error) {
-	var currentProject *apiclient.CreateProjectDTO
+func RunProjectConfiguration(projectList *[]apiclient.ProjectDataDTO, defaults views_util.ProjectConfigDefaults) (bool, error) {
+	var currentProject *apiclient.ProjectDataDTO
 
 	if len(*projectList) > 1 {
 		currentProject = selection.GetProjectRequestFromPrompt(projectList)

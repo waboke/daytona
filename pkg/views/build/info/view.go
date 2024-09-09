@@ -47,7 +47,7 @@ func Render(b *apiclient.Build, apiServerConfig *apiclient.ServerConfig, forceUn
 			ImageUser: &apiServerConfig.DefaultProjectUser,
 		}
 
-		_, buildChoice := views_util.GetProjectBuildChoice(apiclient.CreateProjectDTO{
+		_, buildChoice := views_util.GetProjectBuildChoice(apiclient.ProjectDataDTO{
 			BuildConfig: b.BuildConfig,
 		}, projectDefaults)
 		output += getInfoLine("Build", buildChoice) + "\n"

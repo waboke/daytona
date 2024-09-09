@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 )
 
-func AddProjectFromConfig(projectConfig *apiclient.ProjectConfig, apiClient *apiclient.APIClient, projects *[]apiclient.CreateProjectDTO, branchFlag string) (*string, error) {
+func AddProjectFromConfig(projectConfig *apiclient.ProjectConfig, apiClient *apiclient.APIClient, projects *[]apiclient.ProjectDataDTO, branchFlag string) (*string, error) {
 	chosenBranchName := branchFlag
 
 	if chosenBranchName == "" {
@@ -34,7 +34,7 @@ func AddProjectFromConfig(projectConfig *apiclient.ProjectConfig, apiClient *api
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	project := &apiclient.CreateProjectDTO{
+	project := &apiclient.ProjectDataDTO{
 		Name: projectConfig.Name,
 		Source: apiclient.CreateProjectSourceDTO{
 			Repository: *configRepo,

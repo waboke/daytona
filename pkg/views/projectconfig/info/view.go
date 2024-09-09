@@ -47,7 +47,7 @@ func Render(projectConfig *apiclient.ProjectConfig, apiServerConfig *apiclient.S
 			ImageUser: &apiServerConfig.DefaultProjectUser,
 		}
 
-		createProjectDto := apiclient.CreateProjectDTO{
+		createProjectDto := apiclient.ProjectDataDTO{
 			BuildConfig: projectConfig.BuildConfig,
 		}
 		_, buildChoice := views_util.GetProjectBuildChoice(createProjectDto, projectDefaults)

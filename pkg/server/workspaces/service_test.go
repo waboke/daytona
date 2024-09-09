@@ -44,7 +44,7 @@ var createWorkspaceDto = dto.CreateWorkspaceDTO{
 	Name:   "test",
 	Id:     "test",
 	Target: target.Name,
-	Projects: []dto.CreateProjectDTO{
+	Projects: []dto.ProjectDataDTO{
 		{
 			Name: "project1",
 			Source: dto.CreateProjectSourceDTO{

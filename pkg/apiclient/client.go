@@ -70,6 +70,8 @@ type APIClient struct {
 
 	TargetAPI *TargetAPIService
 
+	TemplateAPI *TemplateAPIService
+
 	WorkspaceAPI *WorkspaceAPIService
 }
 
@@ -100,6 +102,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.SampleAPI = (*SampleAPIService)(&c.common)
 	c.ServerAPI = (*ServerAPIService)(&c.common)
 	c.TargetAPI = (*TargetAPIService)(&c.common)
+	c.TemplateAPI = (*TemplateAPIService)(&c.common)
 	c.WorkspaceAPI = (*WorkspaceAPIService)(&c.common)
 
 	return c

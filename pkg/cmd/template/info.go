@@ -10,15 +10,15 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
-	"github.com/daytonaio/daytona/pkg/views/projectconfig/info"
+	"github.com/daytonaio/daytona/pkg/views/template/info"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var projectConfigInfoCmd = &cobra.Command{
+var templateInfoCmd = &cobra.Command{
 	Use:     "info",
-	Short:   "Show project config info",
+	Short:   "Show template info",
 	Aliases: []string{"view", "inspect"},
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -34,10 +34,10 @@ var projectConfigInfoCmd = &cobra.Command{
 			log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 		}
 
-		var projectConfig *apiclient.ProjectConfig
+		var template *apiclient.Template
 
 		if len(args) == 0 {
-			projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
+			templateList, res, err := apiClient.TemplateAPI.ListTemplates(ctx).Execute()
 			if err != nil {
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
@@ -46,37 +46,33 @@ var projectConfigInfoCmd = &cobra.Command{
 				format.UnblockStdOut()
 			}
 
-			projectConfig = selection.GetProjectConfigFromPrompt(selection.ProjectConfigPromptConfig{
-				ProjectConfigs: projectConfigList,
-				ProjectOrder:   0,
-				ActionVerb:     "View",
-			})
+			template = selection.GetTemplateFromPrompt(templateList, "View")
 			if format.FormatFlag != "" {
 				format.BlockStdOut()
 			}
 
 		} else {
 			var res *http.Response
-			projectConfig, res, err = apiClient.ProjectConfigAPI.GetProjectConfig(ctx, args[0]).Execute()
+			template, res, err = apiClient.TemplateAPI.GetTemplate(ctx, args[0]).Execute()
 			if err != nil {
 				log.Fatal(apiclient_util.HandleErrorResponse(res, err))
 			}
 		}
 
-		if projectConfig == nil {
+		if template == nil {
 			return
 		}
 
 		if format.FormatFlag != "" {
-			formattedData := format.NewFormatter(projectConfig)
+			formattedData := format.NewFormatter(template)
 			formattedData.Print()
 			return
 		}
 
-		info.Render(projectConfig, apiServerConfig, false)
+		info.Render(template, apiServerConfig, false)
 	},
 }
 
 func init() {
-	format.RegisterFormatFlag(projectConfigInfoCmd)
+	format.RegisterFormatFlag(templateInfoCmd)
 }

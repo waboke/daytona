@@ -1016,6 +1016,78 @@ paths:
       summary: Remove a target
       tags:
       - target
+  /template:
+    get:
+      description: List templates
+      operationId: ListTemplates
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Template'
+                type: array
+          description: OK
+      summary: List templates
+      tags:
+      - template
+    put:
+      description: Set template data
+      operationId: SetTemplate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Template'
+        description: Template
+        required: true
+      responses:
+        "201":
+          content: {}
+          description: Created
+      summary: Set template data
+      tags:
+      - template
+      x-codegen-request-body-name: template
+  /template/{templateName}:
+    delete:
+      description: Delete template data
+      operationId: DeleteTemplate
+      parameters:
+      - description: Template name
+        in: path
+        name: templateName
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Delete template data
+      tags:
+      - template
+    get:
+      description: Get template data
+      operationId: GetTemplate
+      parameters:
+      - description: Template name
+        in: path
+        name: templateName
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Template'
+          description: OK
+      summary: Get template data
+      tags:
+      - template
   /workspace:
     get:
       description: List workspaces
@@ -1433,51 +1505,6 @@ components:
       - name
       - repositoryUrl
       type: object
-    CreateProjectDTO:
-      example:
-        buildConfig:
-          cachedBuild:
-            image: image
-            user: user
-          devcontainer:
-            filePath: filePath
-        image: image
-        envVars:
-          key: envVars
-        name: name
-        source:
-          repository:
-            owner: owner
-            path: path
-            name: name
-            id: id
-            source: source
-            prNumber: 0
-            branch: branch
-            cloneTarget: null
-            sha: sha
-            url: url
-        user: user
-      properties:
-        buildConfig:
-          $ref: '#/components/schemas/BuildConfig'
-        envVars:
-          additionalProperties:
-            type: string
-          type: object
-        image:
-          type: string
-        name:
-          type: string
-        source:
-          $ref: '#/components/schemas/CreateProjectSourceDTO'
-        user:
-          type: string
-      required:
-      - envVars
-      - name
-      - source
-      type: object
     CreateProjectSourceDTO:
       example:
         repository:
@@ -1556,7 +1583,7 @@ components:
           type: string
         projects:
           items:
-            $ref: '#/components/schemas/CreateProjectDTO'
+            $ref: '#/components/schemas/ProjectDataDTO'
           type: array
         target:
           type: string
@@ -2037,6 +2064,51 @@ components:
       - repositoryUrl
       - user
       type: object
+    ProjectDataDTO:
+      example:
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        image: image
+        envVars:
+          key: envVars
+        name: name
+        source:
+          repository:
+            owner: owner
+            path: path
+            name: name
+            id: id
+            source: source
+            prNumber: 0
+            branch: branch
+            cloneTarget: null
+            sha: sha
+            url: url
+        user: user
+      properties:
+        buildConfig:
+          $ref: '#/components/schemas/BuildConfig'
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        image:
+          type: string
+        name:
+          type: string
+        source:
+          $ref: '#/components/schemas/CreateProjectSourceDTO'
+        user:
+          type: string
+      required:
+      - envVars
+      - name
+      - source
+      type: object
     ProjectInfo:
       example:
         providerMetadata: providerMetadata
@@ -2285,6 +2357,23 @@ components:
       - Renamed
       - Copied
       - UpdatedButUnmerged
+    Template:
+      example:
+        projectConfigs:
+        - projectConfigs
+        - projectConfigs
+        name: name
+      properties:
+        name:
+          type: string
+        projectConfigs:
+          items:
+            type: string
+          type: array
+      required:
+      - name
+      - projectConfigs
+      type: object
     Workspace:
       example:
         projects:

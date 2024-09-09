@@ -16,6 +16,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/projectconfig"
+	"github.com/daytonaio/daytona/pkg/server/template"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
@@ -47,6 +48,7 @@ type WorkspaceServiceConfig struct {
 	ContainerRegistryService containerregistries.IContainerRegistryService
 	BuildService             builds.IBuildService
 	ProjectConfigService     projectconfig.IProjectConfigService
+	TemplateService          template.ITemplateService
 	ServerApiUrl             string
 	ServerUrl                string
 	Provisioner              provisioner.IProvisioner
@@ -65,6 +67,7 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 		containerRegistryService: config.ContainerRegistryService,
 		buildService:             config.BuildService,
 		projectConfigService:     config.ProjectConfigService,
+		templateService:          config.TemplateService,
 		serverApiUrl:             config.ServerApiUrl,
 		serverUrl:                config.ServerUrl,
 		defaultProjectImage:      config.DefaultProjectImage,
@@ -83,6 +86,7 @@ type WorkspaceService struct {
 	containerRegistryService containerregistries.IContainerRegistryService
 	buildService             builds.IBuildService
 	projectConfigService     projectconfig.IProjectConfigService
+	templateService          template.ITemplateService
 	provisioner              provisioner.IProvisioner
 	apiKeyService            apikeys.IApiKeyService
 	serverApiUrl             string

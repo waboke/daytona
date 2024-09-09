@@ -142,27 +142,6 @@ definitions:
     - name
     - repositoryUrl
     type: object
-  CreateProjectDTO:
-    properties:
-      buildConfig:
-        $ref: '#/definitions/BuildConfig'
-      envVars:
-        additionalProperties:
-          type: string
-        type: object
-      image:
-        type: string
-      name:
-        type: string
-      source:
-        $ref: '#/definitions/CreateProjectSourceDTO'
-      user:
-        type: string
-    required:
-    - envVars
-    - name
-    - source
-    type: object
   CreateProjectSourceDTO:
     properties:
       repository:
@@ -178,7 +157,7 @@ definitions:
         type: string
       projects:
         items:
-          $ref: '#/definitions/CreateProjectDTO'
+          $ref: '#/definitions/ProjectDataDTO'
         type: array
       target:
         type: string
@@ -498,6 +477,27 @@ definitions:
     - repositoryUrl
     - user
     type: object
+  ProjectDataDTO:
+    properties:
+      buildConfig:
+        $ref: '#/definitions/BuildConfig'
+      envVars:
+        additionalProperties:
+          type: string
+        type: object
+      image:
+        type: string
+      name:
+        type: string
+      source:
+        $ref: '#/definitions/CreateProjectSourceDTO'
+      user:
+        type: string
+    required:
+    - envVars
+    - name
+    - source
+    type: object
   ProjectInfo:
     properties:
       created:
@@ -672,6 +672,18 @@ definitions:
     - Renamed
     - Copied
     - UpdatedButUnmerged
+  Template:
+    properties:
+      name:
+        type: string
+      projectConfigs:
+        items:
+          type: string
+        type: array
+    required:
+    - name
+    - projectConfigs
+    type: object
   Workspace:
     properties:
       id:
@@ -1763,6 +1775,75 @@ paths:
       summary: Remove a target
       tags:
       - target
+  /template:
+    get:
+      description: List templates
+      operationId: ListTemplates
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Template'
+            type: array
+      summary: List templates
+      tags:
+      - template
+    put:
+      consumes:
+      - application/json
+      description: Set template data
+      operationId: SetTemplate
+      parameters:
+      - description: Template
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/Template'
+      responses:
+        "201":
+          description: Created
+      summary: Set template data
+      tags:
+      - template
+  /template/{templateName}:
+    delete:
+      description: Delete template data
+      operationId: DeleteTemplate
+      parameters:
+      - description: Template name
+        in: path
+        name: templateName
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Delete template data
+      tags:
+      - template
+    get:
+      consumes:
+      - application/json
+      description: Get template data
+      operationId: GetTemplate
+      parameters:
+      - description: Template name
+        in: path
+        name: templateName
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Template'
+      summary: Get template data
+      tags:
+      - template
   /workspace:
     get:
       description: List workspaces
