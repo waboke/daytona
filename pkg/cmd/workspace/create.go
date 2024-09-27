@@ -9,8 +9,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
@@ -29,6 +32,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/docker/docker/pkg/stringid"
+	"golang.org/x/term"
 	"tailscale.com/tsnet"
 
 	"github.com/spf13/cobra"
@@ -157,27 +161,41 @@ var CreateCmd = &cobra.Command{
 		id := stringid.GenerateRandomID()
 		id = stringid.TruncateID(id)
 
-		logsContext, stopLogs := context.WithCancel(context.Background())
-		go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, id, projectNames)
+		var createdWorkspace *apiclient.Workspace
 
-		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(apiclient.CreateWorkspaceDTO{
-			Id:       id,
-			Name:     workspaceName,
-			Target:   target.Name,
-			Projects: projects,
-		}).Execute()
+		// Inside CreateCmd.RunE or another appropriate function
+		err = blockInputWithInterrupt(ctx, func(ctx context.Context) {
+			// Your existing code to read from websocket and write logs
+			logsContext, stopLogs := context.WithCancel(ctx)
+			defer stopLogs()
+			go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, id, projectNames)
+
+			// Wait for the workspace creation to complete
+			createdWorkspace, res, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(apiclient.CreateWorkspaceDTO{
+				Id:       id,
+				Name:     workspaceName,
+				Target:   target.Name,
+				Projects: projects,
+			}).Execute()
+			if err != nil {
+				stopLogs()
+				apiclient_util.HandleErrorResponse(res, err)
+				return
+			}
+		})
+
 		if err != nil {
-			stopLogs()
-			return apiclient_util.HandleErrorResponse(res, err)
+			if common.IsCtrlCAbort(err) {
+				fmt.Println("\nOperation cancelled by user")
+				return nil
+			}
+			return err
 		}
 
 		err = waitForDial(createdWorkspace, &activeProfile, tsConn)
 		if err != nil {
-			stopLogs()
 			return err
 		}
-
-		stopLogs()
 
 		// Make sure terminal cursor is reset
 		fmt.Print("\033[?25h")
@@ -504,5 +522,58 @@ func dedupProjectNames(projects *[]apiclient.CreateProjectDTO) {
 		} else {
 			projectNames[project.Name] = 2
 		}
+	}
+}
+
+func blockInputWithInterrupt(ctx context.Context, logsFunc func(context.Context)) error {
+	// Get the file descriptor for the terminal
+	fd := int(os.Stdin.Fd())
+
+	// Save the current terminal state
+	oldState, err := term.MakeRaw(fd)
+	if err != nil {
+		return err
+	}
+	defer term.Restore(fd, oldState)
+
+	// Create a channel for interrupt signals
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	defer signal.Stop(sigChan)
+
+	// Create a context that can be canceled
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	// Start a goroutine to read and discard user input, except for Ctrl+C
+	go func() {
+		buffer := make([]byte, 1)
+		for {
+			_, err := os.Stdin.Read(buffer)
+			if err != nil || ctx.Err() != nil {
+				return
+			}
+			if buffer[0] == 3 { // Ctrl+C
+				cancel()
+				return
+			}
+		}
+	}()
+
+	// Start the logs function in a goroutine
+	logsDone := make(chan struct{})
+	go func() {
+		logsFunc(ctx)
+		close(logsDone)
+	}()
+
+	// Wait for either an interrupt signal, Ctrl+C, or logs to finish
+	select {
+	case <-sigChan:
+		return common.ErrCtrlCAbort
+	case <-ctx.Done():
+		return common.ErrCtrlCAbort
+	case <-logsDone:
+		return nil
 	}
 }
