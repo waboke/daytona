@@ -6,17 +6,21 @@ package config
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
 )
 
-var sshHomeDir string
+const WINDOWS_USER_HOME_ENV = "USERPROFILE"
 
-func ensureSshFilesLinked() error {
+var userHomeDirectory string
+var wslWindowsHomeDir string
+
+func ensureSshFilesLinked(userHomeDir string) error {
 	// Make sure ~/.ssh/config file exists if not create it
-	sshDir := filepath.Join(sshHomeDir, ".ssh")
+	sshDir := filepath.Join(userHomeDir, ".ssh")
 	configPath := filepath.Join(sshDir, "config")
 
 	_, err := os.Stat(configPath)
@@ -70,7 +74,7 @@ func ensureSshFilesLinked() error {
 }
 
 func UnlinkSshFiles() error {
-	sshDirPath := filepath.Join(sshHomeDir, ".ssh")
+	sshDirPath := filepath.Join(userHomeDirectory, ".ssh")
 	sshConfigPath := filepath.Join(sshDirPath, "config")
 	daytonaConfigPath := filepath.Join(sshDirPath, "daytona_config")
 
@@ -104,7 +108,7 @@ func UnlinkSshFiles() error {
 
 // Add ssh entry
 
-func generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsPath string) (string, error) {
+func generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsPath string, addWslPath bool) (string, error) {
 	daytonaPath, err := os.Executable()
 	if err != nil {
 		return "", err
@@ -113,18 +117,50 @@ func generateSshConfigEntry(profileId, workspaceId, projectName, knownHostsPath 
 	tab := "\t"
 	projectHostname := GetProjectHostname(profileId, workspaceId, projectName)
 
+	if addWslPath {
+		daytonaPath = fmt.Sprintf("\"C:\\Windows\\system32\\wsl.exe\" \"%s\"", daytonaPath)
+	}
+
 	config := fmt.Sprintf("Host %s\n"+
 		tab+"User daytona\n"+
 		tab+"StrictHostKeyChecking no\n"+
 		tab+"UserKnownHostsFile %s\n"+
-		tab+"ProxyCommand \"%s\" ssh-proxy %s %s %s\n"+
-		tab+"ForwardAgent yes\n\n", projectHostname, knownHostsPath, daytonaPath, profileId, workspaceId, projectName)
+		tab+"ProxyCommand %s ssh-proxy %s %s %s\n"+
+		tab+"ForwardAgent yes\n\n",
+		projectHostname, knownHostsPath, daytonaPath, profileId, workspaceId, projectName)
 
 	return config, nil
 }
 
 func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string) error {
-	err := ensureSshFilesLinked()
+	// Check if being run on WSL
+	// if yes, do this for windows
+	cmd := exec.Command("uname", "-a")
+	output, err := cmd.Output()
+	if err != nil {
+		return err
+	}
+
+	if strings.Contains(string(output), "WSL") {
+		getWindowsPathCmd := exec.Command("bash", "-c", `echo /mnt/c/Users/$(cmd.exe /C "echo %USERNAME%" | tr -d '\r')`)
+
+		windowsPathOutput, err := getWindowsPathCmd.Output()
+		if err != nil {
+			return err
+		}
+		wslWindowsHomeDir = strings.TrimSpace(string(windowsPathOutput))
+
+		err = ensureSshConfigEntryAdded(wslWindowsHomeDir, profileId, workspaceName, projectName, true)
+		if err != nil {
+			return err
+		}
+	}
+
+	return ensureSshConfigEntryAdded(userHomeDirectory, profileId, workspaceName, projectName, false)
+}
+
+func ensureSshConfigEntryAdded(userHomeDir, profileId, workspaceName, projectName string, addWslPath bool) error {
+	err := ensureSshFilesLinked(userHomeDir)
 	if err != nil {
 		return err
 	}
@@ -134,12 +170,12 @@ func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string) err
 		knownHostsFile = "NUL"
 	}
 
-	data, err := generateSshConfigEntry(profileId, workspaceName, projectName, knownHostsFile)
+	data, err := generateSshConfigEntry(profileId, workspaceName, projectName, knownHostsFile, addWslPath)
 	if err != nil {
 		return err
 	}
 
-	sshDir := filepath.Join(sshHomeDir, ".ssh")
+	sshDir := filepath.Join(userHomeDir, ".ssh")
 	configPath := filepath.Join(sshDir, "daytona_config")
 
 	// Read existing content from the file
@@ -171,7 +207,7 @@ func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string) err
 }
 
 func RemoveWorkspaceSshEntries(profileId, workspaceId string) error {
-	sshDir := filepath.Join(sshHomeDir, ".ssh")
+	sshDir := filepath.Join(userHomeDirectory, ".ssh")
 	configPath := filepath.Join(sshDir, "daytona_config")
 
 	// Read existing content from the file
@@ -206,8 +242,8 @@ func GetProjectHostname(profileId, workspaceId, projectName string) string {
 
 func init() {
 	if runtime.GOOS == "windows" {
-		sshHomeDir = os.Getenv("USERPROFILE")
+		userHomeDirectory = os.Getenv(WINDOWS_USER_HOME_ENV)
 	} else {
-		sshHomeDir = os.Getenv("HOME")
+		userHomeDirectory = os.Getenv("HOME")
 	}
 }
