@@ -5,16 +5,24 @@ package server
 
 import (
 	"net/http"
+	"time"
 )
 
 type TailscaleServer interface {
-	Connect() error
-	CreateAuthKey() (string, error)
-	CreateUser() error
+	Connect(authKey string) error
+	CreateAuthKey(params CreateAuthKeyParams) (string, error)
+	CreateUser(user string) error
 	HTTPClient() *http.Client
 	Start(errChan chan error) error
 	Stop() error
 	Purge() error
+}
+
+type CreateAuthKeyParams struct {
+	User       string
+	Ephemeral  bool
+	Reusable   bool
+	Expiration time.Time
 }
 
 type ILocalContainerRegistry interface {

@@ -26,6 +26,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server"
+	server_types "github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/server/containerregistries"
@@ -138,7 +139,18 @@ var ServeCmd = &cobra.Command{
 		case <-headscaleServerStartedChan:
 			log.Info("Headscale server started")
 			go func() {
-				headscaleServerErrChan <- server.TailscaleServer.Connect()
+				authKeyParams := server_types.GetDefaultTailscaleAuthKeyParams()
+				err := server.TailscaleServer.CreateUser(authKeyParams.User)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				authKey, err := server.TailscaleServer.CreateAuthKey(server_types.GetDefaultTailscaleAuthKeyParams())
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				headscaleServerErrChan <- server.TailscaleServer.Connect(authKey)
 			}()
 		case err := <-headscaleServerErrChan:
 			return err
@@ -316,7 +328,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		RegistryUrl:           c.RegistryUrl,
 		BaseDir:               c.ProvidersDir,
 		CreateProviderNetworkKey: func(providerName string) (string, error) {
-			return headscaleServer.CreateAuthKey()
+			return headscaleServer.CreateAuthKey(server_types.GetDefaultTailscaleAuthKeyParams())
 		},
 		ServerPort: c.HeadscalePort,
 		ApiPort:    c.ApiPort,

@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/google/uuid"
@@ -191,4 +192,13 @@ func getDefaultBinariesPath() (string, error) {
 	}
 
 	return filepath.Join(configDir, "binaries"), nil
+}
+
+func GetDefaultTailscaleAuthKeyParams() CreateAuthKeyParams {
+	return CreateAuthKeyParams{
+		Reusable:   false,
+		User:       "daytona",
+		Ephemeral:  true,
+		Expiration: time.Now().Add(100000 * time.Hour),
+	}
 }

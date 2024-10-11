@@ -5,22 +5,22 @@ package headscale
 
 import (
 	"fmt"
-	"time"
 
+	"github.com/daytonaio/daytona/pkg/server"
 	v1 "github.com/juanfont/headscale/gen/go/headscale/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *HeadscaleServer) CreateAuthKey() (string, error) {
+func (s *HeadscaleServer) CreateAuthKey(params server.CreateAuthKeyParams) (string, error) {
 	log.Debug("Creating headscale auth key")
 
 	request := &v1.CreatePreAuthKeyRequest{
-		Reusable:   false,
-		User:       "daytona",
-		Ephemeral:  true,
-		Expiration: timestamppb.New(time.Now().Add(100000 * time.Hour)),
+		Reusable:   params.Reusable,
+		User:       params.User,
+		Ephemeral:  params.Ephemeral,
+		Expiration: timestamppb.New(params.Expiration),
 	}
 
 	ctx, client, conn, cancel, err := s.getClient()

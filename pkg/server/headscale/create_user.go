@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *HeadscaleServer) CreateUser() error {
+func (s *HeadscaleServer) CreateUser(user string) error {
 	log.Debug("Creating headscale user")
 
 	ctx, client, conn, cancel, err := s.getClient()
@@ -20,7 +20,7 @@ func (s *HeadscaleServer) CreateUser() error {
 	defer conn.Close()
 
 	_, err = client.GetUser(ctx, &v1.GetUserRequest{
-		Name: "daytona",
+		Name: user,
 	})
 	if err == nil {
 		log.Debug("User already exists")
@@ -28,7 +28,7 @@ func (s *HeadscaleServer) CreateUser() error {
 	}
 
 	_, err = client.CreateUser(ctx, &v1.CreateUserRequest{
-		Name: "daytona",
+		Name: user,
 	})
 
 	return err

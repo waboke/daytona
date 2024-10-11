@@ -18,17 +18,7 @@ var tsNetServer = &tsnet.Server{
 	Hostname: "server",
 }
 
-func (s *HeadscaleServer) Connect() error {
-	err := s.CreateUser()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	authKey, err := s.CreateAuthKey()
-	if err != nil {
-		log.Fatal(err)
-	}
-
+func (s *HeadscaleServer) Connect(authKey string) error {
 	tsNetServer.ControlURL = fmt.Sprintf("http://localhost:%d", s.headscalePort)
 	tsNetServer.AuthKey = authKey
 
