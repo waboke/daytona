@@ -117,5 +117,10 @@ func (s *Server) Start() error {
 		return err
 	}
 
-	return s.registerProviders()
+	err = s.registerProviders()
+	if err != nil {
+		return err
+	}
+
+	return s.lockInitialProviderSetups()
 }

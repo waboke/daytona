@@ -8,7 +8,9 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 
+	"github.com/daytonaio/daytona/pkg/provider/manager"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,9 +24,19 @@ func (s *Server) downloadDefaultProviders() error {
 
 	log.Info("Downloading default providers")
 	for providerName, provider := range defaultProviders {
-		_, err = s.ProviderManager.DownloadProvider(context.Background(), provider.DownloadUrls, providerName, false)
+		lockFilePath := filepath.Join(s.config.ProvidersDir, providerName, manager.INITIAL_SETUP_LOCK_FILE_NAME)
+
+		_, err := os.Stat(lockFilePath)
+		if err == nil {
+			continue
+		}
+
+		_, err = s.ProviderManager.DownloadProvider(context.Background(), provider.DownloadUrls, providerName)
 		if err != nil {
-			log.Error(err)
+			if !manager.IsProviderAlreadyDownloaded(err, providerName) {
+				log.Error(err)
+			}
+			continue
 		}
 	}
 
@@ -58,6 +70,10 @@ func (s *Server) registerProviders() error {
 				continue
 			}
 
+			if strings.HasSuffix(pluginPath, manager.INITIAL_SETUP_LOCK_FILE_NAME) {
+				continue
+			}
+
 			err = s.ProviderManager.RegisterProvider(pluginPath)
 			if err != nil {
 				log.Error(err)
@@ -84,6 +100,26 @@ func (s *Server) registerProviders() error {
 	}
 
 	log.Info("Providers registered")
+
+	return nil
+}
+
+func (s *Server) lockInitialProviderSetups() error {
+	providers := s.ProviderManager.GetProviders()
+	for providerName := range providers {
+		lockFilePath := filepath.Join(s.config.ProvidersDir, providerName, manager.INITIAL_SETUP_LOCK_FILE_NAME)
+
+		_, err := os.Stat(lockFilePath)
+		if err == nil {
+			continue
+		}
+
+		file, err := os.Create(lockFilePath)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+	}
 
 	return nil
 }
